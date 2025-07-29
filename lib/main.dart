@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'views/splash/splash_screen.dart';
+import 'views/auth/login_screen.dart';
+import 'views/auth/forgot_password_screen.dart';
+import 'views/auth/reset_password_screen.dart';
 import 'resources/themes/app_theme.dart';
 import 'services/navigation_service.dart';
 
@@ -13,7 +16,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Set status bar style
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -28,10 +30,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       navigatorKey: NavigationService.navigatorKey,
-      home: const SplashScreen(),
+      initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
-        // '/login': (context) => const Placeholder(), // Replace with LoginScreen
+        '/login': (context) => const LoginScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/reset-password': (context) => const ResetPasswordScreen(),
         // '/dashboard': (context) => const Placeholder(), // Replace with DashboardScreen
       },
     );
