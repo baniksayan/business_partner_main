@@ -1,0 +1,453 @@
+[{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/android",
+	"owner": "_generated_diagnostic_collection_name_#5",
+	"code": "0",
+	"severity": 8,
+	"message": "The supplied phased action failed with an exception.\nCould not create task ':generateLockfiles'.\nProcess 'command '/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/android/gradlew'' finished with non-zero exit value 1",
+	"source": "Java",
+	"startLineNumber": 1,
+	"startColumn": 1,
+	"endLineNumber": 1,
+	"endColumn": 1,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "uri_does_not_exist",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/uri_does_not_exist",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "Target of URI doesn't exist: 'package:fl_chart/fl_chart.dart'.\nTry creating the file referenced by the URI, or try using a URI for a file that does exist.",
+	"source": "dart",
+	"startLineNumber": 1,
+	"startColumn": 8,
+	"endLineNumber": 1,
+	"endColumn": 40,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'LineChart' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'LineChart'.",
+	"source": "dart",
+	"startLineNumber": 20,
+	"startColumn": 14,
+	"endLineNumber": 20,
+	"endColumn": 23,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'LineChartData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'LineChartData'.",
+	"source": "dart",
+	"startLineNumber": 21,
+	"startColumn": 9,
+	"endLineNumber": 21,
+	"endColumn": 22,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'FlTitlesData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'FlTitlesData'.",
+	"source": "dart",
+	"startLineNumber": 24,
+	"startColumn": 23,
+	"endLineNumber": 24,
+	"endColumn": 35,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'AxisTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'AxisTitles'.",
+	"source": "dart",
+	"startLineNumber": 26,
+	"startColumn": 25,
+	"endLineNumber": 26,
+	"endColumn": 35,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'SideTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'SideTitles'.",
+	"source": "dart",
+	"startLineNumber": 27,
+	"startColumn": 27,
+	"endLineNumber": 27,
+	"endColumn": 37,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'AxisTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'AxisTitles'.",
+	"source": "dart",
+	"startLineNumber": 29,
+	"startColumn": 27,
+	"endLineNumber": 29,
+	"endColumn": 37,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'SideTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'SideTitles'.",
+	"source": "dart",
+	"startLineNumber": 30,
+	"startColumn": 27,
+	"endLineNumber": 30,
+	"endColumn": 37,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'AxisTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'AxisTitles'.",
+	"source": "dart",
+	"startLineNumber": 50,
+	"startColumn": 26,
+	"endLineNumber": 50,
+	"endColumn": 36,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'SideTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'SideTitles'.",
+	"source": "dart",
+	"startLineNumber": 50,
+	"startColumn": 49,
+	"endLineNumber": 50,
+	"endColumn": 59,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'AxisTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'AxisTitles'.",
+	"source": "dart",
+	"startLineNumber": 51,
+	"startColumn": 24,
+	"endLineNumber": 51,
+	"endColumn": 34,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'SideTitles' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'SideTitles'.",
+	"source": "dart",
+	"startLineNumber": 51,
+	"startColumn": 47,
+	"endLineNumber": 51,
+	"endColumn": 57,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'FlGridData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'FlGridData'.",
+	"source": "dart",
+	"startLineNumber": 53,
+	"startColumn": 21,
+	"endLineNumber": 53,
+	"endColumn": 31,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'FlBorderData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'FlBorderData'.",
+	"source": "dart",
+	"startLineNumber": 54,
+	"startColumn": 23,
+	"endLineNumber": 54,
+	"endColumn": 35,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'LineTouchData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'LineTouchData'.",
+	"source": "dart",
+	"startLineNumber": 55,
+	"startColumn": 26,
+	"endLineNumber": 55,
+	"endColumn": 39,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'LineTouchTooltipData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'LineTouchTooltipData'.",
+	"source": "dart",
+	"startLineNumber": 56,
+	"startColumn": 31,
+	"endLineNumber": 56,
+	"endColumn": 51,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'LineTooltipItem' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'LineTooltipItem'.",
+	"source": "dart",
+	"startLineNumber": 60,
+	"startColumn": 26,
+	"endLineNumber": 60,
+	"endColumn": 41,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'LineChartBarData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'LineChartBarData'.",
+	"source": "dart",
+	"startLineNumber": 83,
+	"startColumn": 13,
+	"endLineNumber": 83,
+	"endColumn": 29,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'FlSpot' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'FlSpot'.",
+	"source": "dart",
+	"startLineNumber": 84,
+	"startColumn": 54,
+	"endLineNumber": 84,
+	"endColumn": 60,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'BarAreaData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'BarAreaData'.",
+	"source": "dart",
+	"startLineNumber": 93,
+	"startColumn": 29,
+	"endLineNumber": 93,
+	"endColumn": 40,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'FlDotData' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'FlDotData'.",
+	"source": "dart",
+	"startLineNumber": 97,
+	"startColumn": 24,
+	"endLineNumber": 97,
+	"endColumn": 33,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/sayanbanik/Documents/Company_s_Website/FutureFounder/business_partner_main/business_partner_main/lib/widgets/charts/stock_line_chart.dart",
+	"owner": "_generated_diagnostic_collection_name_#6",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'FlDotCirclePainter' isn't defined for the type 'StockLineChart'.\nTry correcting the name to the name of an existing method, or defining a method named 'FlDotCirclePainter'.",
+	"source": "dart",
+	"startLineNumber": 100,
+	"startColumn": 26,
+	"endLineNumber": 100,
+	"endColumn": 44,
+	"origin": "extHost1"
+}]

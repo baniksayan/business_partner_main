@@ -1,3 +1,4 @@
+import 'package:business_partner_main/views/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'views/splash/splash_screen.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/reset-password': (context) => const ResetPasswordScreen(),
-        // '/dashboard': (context) => const Placeholder(), // Replace with DashboardScreen
+        '/dashboard': (context) => const DashboardScreen(),
+// '/notifications': (context) => const NotificationsScreen(),
       },
     );
   }
