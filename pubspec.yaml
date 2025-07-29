@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    fl_chart: ^1.0.0
+  fl_chart: ^1.0.0
   
   # Core Dependencies
   provider: ^6.1.5
@@ -19,6 +19,7 @@ dependencies:
   # Animation & UI Dependencies (for your splash screen)
   animations: ^2.0.11
   flutter_animate: ^4.5.2
+
 
 dev_dependencies:
   flutter_test:
