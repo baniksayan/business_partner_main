@@ -1,3 +1,4 @@
+import 'package:business_partner_main/views/products/add_product_screen.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/cards/product_card.dart';
 import '../../models/product.dart';
@@ -260,15 +261,14 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
   }
 
   // Add new product functionality
-  void _addNewProduct() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening Add New Product screen...'),
-        backgroundColor: Color(0xFF4FC3F7),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    // TODO: Navigate to add product screen
-    // Navigator.pushNamed(context, '/add-product');
-  }
+  // Replace the existing _addNewProduct() method with:
+void _addNewProduct() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const AddProductScreen(),
+    ),
+  );
+}
+
 }
