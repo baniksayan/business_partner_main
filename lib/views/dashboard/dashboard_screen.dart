@@ -218,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
 
-      // --- FIXED BOTTOM NAVIGATION ---
+      // --- FIXED BOTTOM NAVIGATION WITH WORKING NAVIGATION ---
       bottomNavigationBar: Container(
         height: 65,
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -246,26 +246,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Bottom navigation button widget
+  // Bottom navigation button widget with navigation functionality
   Widget _navButton(IconData icon, String label, {bool selected = false}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: selected ? const Color(0xFF4FC3F7) : Colors.grey[500],
-          size: 26,
-        ),
-        Text(
-          label,
-          style: TextStyle(
+    return GestureDetector(
+      onTap: () {
+        // Handle navigation based on the label
+        if (!selected) { // Only navigate if not already selected
+          switch (label) {
+            case "Products":
+              Navigator.pushNamed(context, '/products');
+              break;
+            case "Bookings":
+              Navigator.pushNamed(context, '/bookings');
+              break;
+            case "Profile":
+              Navigator.pushNamed(context, '/profile');
+              break;
+            case "Dashboard":
+              // Already on dashboard, no navigation needed
+              break;
+          }
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
             color: selected ? const Color(0xFF4FC3F7) : Colors.grey[500],
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Inter',
-            fontSize: 12.5,
+            size: 26,
           ),
-        ),
-      ],
+          Text(
+            label,
+            style: TextStyle(
+              color: selected ? const Color(0xFF4FC3F7) : Colors.grey[500],
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Inter',
+              fontSize: 12.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
