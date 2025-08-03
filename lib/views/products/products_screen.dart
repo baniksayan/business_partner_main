@@ -14,29 +14,69 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStateMixin {
   final List<Product> _products = [
     Product(
+      id: '1',
       image: "assets/images/avocado.png",
       name: "Organic Avocado",
       price: "₹29.99",
+      description: "Fresh, creamy organic avocados perfect for salads, toast, and smoothies.",
+      category: "Fruits",
+      stock: 25,
+      inStock: true,
+      rating: 4.5,
+      reviewCount: 128,
+      features: ['100% Organic', 'Rich in Healthy Fats', 'Farm Fresh', 'No Pesticides'],
     ),
     Product(
+      id: '2',
       image: "assets/images/strawberry.png",
       name: "Fresh Strawberries",
       price: "₹19.99",
+      description: "Sweet, juicy strawberries bursting with flavor and vitamins.",
+      category: "Fruits",
+      stock: 15,
+      inStock: true,
+      rating: 4.8,
+      reviewCount: 85,
+      features: ['Vitamin C Rich', 'Antioxidants', 'Fresh Picked', 'Sweet & Juicy'],
     ),
     Product(
+      id: '3',
       image: "assets/images/banana.png",
       name: "Ripe Bananas",
       price: "₹9.99",
+      description: "Naturally sweet bananas, perfect for snacking and baking.",
+      category: "Fruits",
+      stock: 30,
+      inStock: true,
+      rating: 4.4,
+      reviewCount: 67,
+      features: ['Potassium Rich', 'Naturally Sweet', 'Energy Booster'],
     ),
     Product(
+      id: '4',
       image: "assets/images/mango.png",
       name: "Sweet Mangoes",
       price: "₹14.99",
+      description: "Deliciously ripe mangoes for a taste of summer.",
+      category: "Fruits",
+      stock: 20,
+      inStock: true,
+      rating: 4.9,
+      reviewCount: 150,
+      features: ['Tropical Flavor', 'Vitamin A', 'Handpicked'],
     ),
     Product(
+      id: '5',
       image: "assets/images/orange.png",
       name: "Juicy Oranges",
       price: "₹12.99",
+      description: "Citrusy and juicy oranges to refresh your day.",
+      category: "Fruits",
+      stock: 18,
+      inStock: true,
+      rating: 4.6,
+      reviewCount: 110,
+      features: ['Immunity Booster', 'Citrus Fresh', 'Rich in Vitamin C'],
     ),
   ];
 
@@ -85,7 +125,6 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
           IconButton(
             icon: const Icon(Icons.search, color: Color(0xFF4FC3F7)),
             onPressed: () {
-              // Navigate to Search Suggestion Screen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -105,10 +144,7 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
               child: Row(
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () {
-                      // TODO: Implement sorting functionality
-                      _showSortBottomSheet();
-                    },
+                    onPressed: _showSortBottomSheet,
                     icon: const Icon(Icons.sort_rounded, color: Color(0xFF4FC3F7), size: 20),
                     label: const Text(
                       'Sort',
@@ -140,10 +176,7 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
                 itemBuilder: (context, i) => AnimatedProductCard(
                   product: _products[i],
                   delay: 80 * i,
-                  onEdit: () {
-                    // TODO: Navigate to edit product screen
-                    _editProduct(_products[i]);
-                  },
+                  onEdit: () => _editProduct(_products[i]),
                 ),
               ),
             ),
@@ -153,10 +186,7 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Navigate to Add New Product screen
-                    _addNewProduct();
-                  },
+                  onPressed: _addNewProduct,
                   icon: const Icon(Icons.add, size: 22),
                   label: const Text(
                     "Add New Product",
@@ -182,7 +212,6 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
     );
   }
 
-  // Sort bottom sheet functionality
   void _showSortBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -246,7 +275,6 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
     );
   }
 
-  // Edit product functionality
   void _editProduct(Product product) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -256,19 +284,16 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
-    // TODO: Navigate to edit product screen
-    // Navigator.pushNamed(context, '/edit-product', arguments: product);
+    // TODO: Implement actual edit navigation
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => EditProductScreen(product: product)));
   }
 
-  // Add new product functionality
-  // Replace the existing _addNewProduct() method with:
-void _addNewProduct() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => const AddProductScreen(),
-    ),
-  );
-}
-
+  void _addNewProduct() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddProductScreen(),
+      ),
+    );
+  }
 }
