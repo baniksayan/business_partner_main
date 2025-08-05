@@ -13,7 +13,7 @@ import '../../widgets/products/product_options_bottom_sheet.dart';
 import '../../widgets/dialogs/reply_dialog_widget.dart';
 import '../../widgets/dialogs/stock_dialog_widget.dart';
 import '../../widgets/dialogs/price_dialog_widget.dart';
-import '../../widgets/dialogs/confirmation_dialog.dart';
+// import '../../widgets/dialogs/confirmation_dialog.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
