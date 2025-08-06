@@ -4,6 +4,7 @@ class DashboardExtraCard extends StatelessWidget {
   final IconData icon;
   final String title, value, subtext;
   final Color background;
+  final VoidCallback? onTap; // Add this parameter
 
   const DashboardExtraCard({
     Key? key,
@@ -11,6 +12,7 @@ class DashboardExtraCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.subtext,
+    this.onTap, // Add this parameter
     this.background = Colors.white,
   }) : super(key: key);
 

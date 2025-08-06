@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/cards/dashboard_stats_card.dart';
 import '../../widgets/charts/stock_line_chart.dart';
 import '../../widgets/cards/dashboard_extra_card.dart';
-
+import '../customers/customers_list_screen.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
@@ -28,13 +28,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     // Additional dashboard feature cards
     final extraCards = [
-      DashboardExtraCard(
-        icon: Icons.people_outline,
-        title: 'Customers',
-        value: '1,032',
-        subtext: 'Total customers',
-        background: Colors.indigo[50]!,
+      GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CustomersListScreen(),
       ),
+    );
+  },
+  child: DashboardExtraCard(
+    icon: Icons.people_outline,
+    title: 'Customers',
+    value: '1,032',
+    subtext: 'Total customers',
+    background: Colors.indigo[50]!,
+  ),
+),
+
+
       DashboardExtraCard(
         icon: Icons.star_half,
         title: 'Feedbacks',

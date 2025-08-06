@@ -1,3 +1,4 @@
+// C:\flutter_project\business_partner_main\lib\resources\colors\app_colors.dart
 import 'package:flutter/material.dart';
 
 class AppColors {
