@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Sayan Banik',
+                      'Sribash sarkar',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 24,
