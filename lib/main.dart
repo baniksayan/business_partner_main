@@ -9,6 +9,7 @@ import 'views/auth/forgot_password_screen.dart';
 import 'views/auth/reset_password_screen.dart';
 import 'resources/themes/app_theme.dart';
 import 'services/navigation_service.dart';
+import 'package:business_partner_main/views/profile/profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,9 +43,9 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         '/products': (context) => const ProductsScreen(),
         '/search': (context) => const SearchSuggestionScreen(),
+        '/profile': (context) => const ProfileScreen(),
 
         // '/notifications': (context) => const NotificationsScreen(),
-
       },
     );
   }
