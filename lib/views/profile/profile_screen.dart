@@ -1,3 +1,4 @@
+import 'package:business_partner_main/views/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/profile/profile_viewmodel.dart';
@@ -13,7 +14,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
   int _currentIndex = 3; // Profile tab index
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -26,23 +28,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
     _animationController.forward();
   }
 
@@ -63,7 +57,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             children: [
               // Header with back button and settings
               _buildAppBar(),
-              
               // Profile content
               Expanded(
                 child: Consumer<ProfileViewModel>(
@@ -95,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                         ),
                       );
                     }
-                    
+
                     if (viewModel.hasError) {
                       return Center(
                         child: Container(
@@ -134,7 +127,9 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF4FC3F7),
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -147,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                         ),
                       );
                     }
-                    
+
                     return FadeTransition(
                       opacity: _fadeAnimation,
                       child: SlideTransition(
@@ -157,20 +152,14 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                           child: Column(
                             children: [
                               const SizedBox(height: 20),
-                              
                               // Profile Header (Image, Name, Role)
                               ProfileHeaderWidget(viewModel: viewModel),
-                              
                               const SizedBox(height: 30),
-                              
                               // Profile Information (Email, Phone, Company)
                               ProfileInfoWidget(viewModel: viewModel),
-                              
                               const SizedBox(height: 40),
-                              
                               // Action Buttons (Edit Profile, Change Password)
                               ProfileActionButtons(viewModel: viewModel),
-                              
                               const SizedBox(height: 30),
                             ],
                           ),
@@ -183,7 +172,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             ],
           ),
         ),
-        
         // Persistent Bottom Navigation
         bottomNavigationBar: _buildBottomNavigation(),
       ),
@@ -221,17 +209,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          
           const Spacer(),
-          
           // Title
-          Text(
-            'Profile',
-            style: AppTextStyles.heading3.copyWith(fontSize: 20),
-          ),
-          
+          Text('Profile', style: AppTextStyles.heading3.copyWith(fontSize: 20)),
           const Spacer(),
-          
           // Settings button
           Container(
             decoration: BoxDecoration(
@@ -244,18 +225,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 color: Color(0xFF4FC3F7),
                 size: 20,
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Settings coming soon'),
-                    backgroundColor: const Color(0xFF4FC3F7),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
                     ),
                   ),
-                );
-              },
             ),
           ),
         ],
@@ -265,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
   Widget _buildBottomNavigation() {
     return Container(
-      height: 70,
+      height: 75, // Increased height to accommodate content
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -285,24 +261,37 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _navButton(Icons.dashboard_outlined, Icons.dashboard, "Dashboard", 0),
-          _navButton(Icons.shopping_bag_outlined, Icons.shopping_bag, "Products", 1),
-          _navButton(Icons.book_online_outlined, Icons.book_online, "Bookings", 2),
+          _navButton(
+            Icons.shopping_bag_outlined,
+            Icons.shopping_bag,
+            "Products",
+            1,
+          ),
+          _navButton(
+            Icons.book_online_outlined,
+            Icons.book_online,
+            "Bookings",
+            2,
+          ),
           _navButton(Icons.person_outline, Icons.person, "Profile", 3),
         ],
       ),
     );
   }
 
-  Widget _navButton(IconData outlinedIcon, IconData filledIcon, String label, int index) {
+  Widget _navButton(
+    IconData outlinedIcon,
+    IconData filledIcon,
+    String label,
+    int index,
+  ) {
     final isSelected = _currentIndex == index;
-    
     return GestureDetector(
       onTap: () {
         if (!isSelected) {
           setState(() {
             _currentIndex = index;
           });
-          
           switch (label) {
             case "Dashboard":
               Navigator.pushReplacementNamed(context, '/dashboard');
@@ -327,9 +316,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ), // Reduced padding
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4FC3F7).withOpacity(0.1) : Colors.transparent,
+          color:
+              isSelected
+                  ? const Color(0xFF4FC3F7).withOpacity(0.1)
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -341,17 +336,17 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 isSelected ? filledIcon : outlinedIcon,
                 key: ValueKey(isSelected),
                 color: isSelected ? const Color(0xFF4FC3F7) : Colors.grey[500],
-                size: 24,
+                size: 22, // Slightly reduced icon size
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2), // Reduced spacing
             Text(
               label,
               style: TextStyle(
                 color: isSelected ? const Color(0xFF4FC3F7) : Colors.grey[500],
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 fontFamily: 'Inter',
-                fontSize: 11,
+                fontSize: 10, // Reduced font size
               ),
             ),
           ],

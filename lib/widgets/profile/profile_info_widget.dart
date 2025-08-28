@@ -5,10 +5,8 @@ import '../../resources/styles/text_styles.dart';
 class ProfileInfoWidget extends StatelessWidget {
   final ProfileViewModel viewModel;
 
-  const ProfileInfoWidget({
-    Key? key,
-    required this.viewModel,
-  }) : super(key: key);
+  const ProfileInfoWidget({Key? key, required this.viewModel})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +31,9 @@ class ProfileInfoWidget extends StatelessWidget {
             'Personal Information',
             style: AppTextStyles.heading3.copyWith(fontSize: 16),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Email
           _buildInfoItem(
             icon: Icons.email_outlined,
@@ -44,9 +42,9 @@ class ProfileInfoWidget extends StatelessWidget {
             value: viewModel.userEmail,
             backgroundColor: const Color(0xFF4CAF50).withOpacity(0.1),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Phone (showing formatted with +91)
           _buildInfoItem(
             icon: Icons.phone_outlined,
@@ -55,9 +53,9 @@ class ProfileInfoWidget extends StatelessWidget {
             value: viewModel.formattedPhone,
             backgroundColor: const Color(0xFF2196F3).withOpacity(0.1),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Company
           _buildInfoItem(
             icon: Icons.business_outlined,
@@ -85,10 +83,7 @@ class ProfileInfoWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: iconColor.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: iconColor.withOpacity(0.2), width: 1),
       ),
       child: Row(
         children: [
@@ -106,15 +101,11 @@ class ProfileInfoWidget extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 22,
-            ),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Label and Value
           Expanded(
             child: Column(
@@ -149,13 +140,13 @@ class ProfileInfoWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Edit indicator
-          Icon(
-            Icons.edit_outlined,
-            color: Colors.grey[400],
-            size: 18,
-          ),
+          // Icon(
+          //   Icons.edit_outlined,
+          //   color: Colors.grey[400],
+          //   size: 18,
+          // ),
         ],
       ),
     );

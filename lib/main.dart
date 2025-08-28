@@ -1,4 +1,5 @@
 import 'package:business_partner_main/views/dashboard/dashboard_screen.dart';
+import 'package:business_partner_main/views/notifications/notifications_screen.dart';
 import 'package:business_partner_main/views/products/products_screen.dart';
 import 'package:business_partner_main/views/products/search_suggestion_screen.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +45,7 @@ class MyApp extends StatelessWidget {
         '/products': (context) => const ProductsScreen(),
         '/search': (context) => const SearchSuggestionScreen(),
         '/profile': (context) => const ProfileScreen(),
-
-        // '/notifications': (context) => const NotificationsScreen(),
+        '/notifications': (context) => const NotificationsScreen(),
       },
     );
   }
