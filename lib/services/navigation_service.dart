@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
 class NavigationService {
-  static final NavigationService _instance = NavigationService._internal();
-  factory NavigationService() => _instance;
-  NavigationService._internal();
-
-  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  // Make this static so it can be accessed from MaterialApp
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   Future<dynamic> navigateTo(String routeName, {Object? arguments}) {
     return navigatorKey.currentState!.pushNamed(routeName, arguments: arguments);
@@ -19,17 +16,22 @@ class NavigationService {
     );
   }
 
-  Future<dynamic> navigateToReplacement(String routeName, {Object? arguments}) {
+  Future<dynamic> pushReplacement(String routeName, {Object? arguments}) {
     return navigatorKey.currentState!.pushReplacementNamed(routeName, arguments: arguments);
   }
 
-  void goBack() {
-    return navigatorKey.currentState!.pop();
+  void goBack({Object? result}) {
+    navigatorKey.currentState!.pop(result);
   }
 
-  void goBackWithResult(dynamic result) {
-    return navigatorKey.currentState!.pop(result);
+  bool canGoBack() {
+    return navigatorKey.currentState!.canPop();
   }
 
+  void popUntil(String routeName) {
+    navigatorKey.currentState!.popUntil(ModalRoute.withName(routeName));
+  }
+
+  // Get current context (useful for showing dialogs, etc.)
   BuildContext? get currentContext => navigatorKey.currentContext;
 }

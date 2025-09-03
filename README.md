@@ -38,3 +38,11 @@ A Flutter-based business dashboard using MVVM architecture for partners (like Ub
 - Modular codebase
 - Clean separation of logic and UI
 - Backend-ready structure
+
+
+
+
+
+<!--  SRIBASH ADD PACKAGES AND NEW FOLDER-->
+   <!-- flutter pub add shared_preferences -->
+

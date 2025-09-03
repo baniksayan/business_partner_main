@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/auth/login_viewmodel.dart';
-import '../../core/enums/view_state.dart';
-
+import '../viewmodels/auth/login_viewmodel.dart';
+import '../core/enums/view_state.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key}); // Add const constructor
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState(); // Updated method name
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -25,20 +26,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: const Text('Login'), // Add const to Text widget
         backgroundColor: Colors.blue,
       ),
       body: Consumer<LoginViewModel>(
         builder: (context, viewModel, child) {
           return Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0), // Add const
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Logo or Title
-                  Text(
+                  const Text(
                     'Welcome Back!',
                     style: TextStyle(
                       fontSize: 28,
@@ -46,16 +47,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.blue,
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
                   // Email/Phone Field
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email or Phone',
                       prefixIcon: Icon(Icons.email),
                       border: OutlineInputBorder(),
-                      errorText: viewModel.state == ViewState.error ? null : null,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -64,13 +64,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Password Field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                       prefixIcon: Icon(Icons.lock),
                       border: OutlineInputBorder(),
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
                   // Login Button
                   SizedBox(
@@ -97,24 +97,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                       },
-                      child: viewModel.isBusy
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text(
-                              'Login',
-                              style: TextStyle(fontSize: 18),
-                            ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
                       ),
+                      child: viewModel.isBusy
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Login',
+                              style: TextStyle(fontSize: 18),
+                            ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Error Message
                   if (viewModel.state == ViewState.error)
                     Container(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.red.shade100,
                         borderRadius: BorderRadius.circular(8),
@@ -122,8 +122,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error, color: Colors.red),
-                          SizedBox(width: 10),
+                          const Icon(Icons.error, color: Colors.red),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               viewModel.errorMessage,
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Success Message
                   if (viewModel.state == ViewState.success)
                     Container(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.green.shade100,
                         borderRadius: BorderRadius.circular(8),
@@ -145,8 +145,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.check_circle, color: Colors.green),
-                          SizedBox(width: 10),
+                          const Icon(Icons.check_circle, color: Colors.green),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               viewModel.message,
@@ -157,12 +157,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Forgot Password Button
                   TextButton(
                     onPressed: viewModel.navigateToForgotPassword,
-                    child: Text('Forgot Password?'),
+                    child: const Text('Forgot Password?'),
                   ),
                 ],
               ),
