@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../resources/colors/app_colors.dart';
 import '../../resources/styles/text_styles.dart';
+import 'booking_details_screen.dart'; // Add this import
 
 class BookingsScreen extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
   final List<Map<String, dynamic>> bookings = [
     {
       'customer': 'Rahul Singh',
+      'phone': '+919876543210', // Add phone numbers
       'date': '9 Sep, 2025',
       'time': '11:00 AM',
       'status': 'Cancelled',
@@ -19,6 +21,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     },
     {
       'customer': 'Amit Sharma',
+      'phone': '+919876543211', // Add phone numbers
       'date': '11 Sep, 2025',
       'time': '2:00 PM',
       'status': 'Confirmed',
@@ -27,6 +30,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     },
     {
       'customer': 'Neha Verma',
+      'phone': '+919876543212', // Add phone numbers
       'date': '10 Sep, 2025',
       'time': '5:30 PM',
       'status': 'Pending',
@@ -216,7 +220,17 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(18),
                           onTap: () {
-                            // TODO: Navigate to booking details
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookingDetailsScreen(
+                                  booking: {
+                                    ...booking,
+                                    'id': '1234${index + 1}', // Generate booking ID
+                                  },
+                                ),
+                              ),
+                            );
                           },
                           child: Container(
                             decoration: BoxDecoration(
