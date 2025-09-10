@@ -300,16 +300,10 @@ class _ProfileScreenState extends State<ProfileScreen>
               Navigator.pushReplacementNamed(context, '/products');
               break;
             case "Bookings":
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Bookings screen coming soon'),
-                  backgroundColor: const Color(0xFF4FC3F7),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
+              Navigator.pushReplacementNamed(context, '/bookings');
+              break;
+            case "Profile":
+              Navigator.pushReplacementNamed(context, '/profile');
               break;
           }
         }

@@ -1,11 +1,8 @@
+import 'package:business_partner_main/views/customers/customers_list_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../../resources/styles/text_styles.dart';
-
 import '../../models/notification_model.dart';
-
 import 'notification_detail_screen.dart';
-
 import 'send_notification_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -186,6 +183,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final offers = OfferNotificationStore.notifications;
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -733,4 +731,24 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       ),
     );
   }
+}
+
+class OfferNotification {
+  final String title;
+  final String message;
+  final String channel;
+  final Customer customer;
+  final DateTime date;
+
+  OfferNotification({
+    required this.title,
+    required this.message,
+    required this.channel,
+    required this.customer,
+    required this.date,
+  });
+}
+
+class OfferNotificationStore {
+  static final List<OfferNotification> notifications = [];
 }

@@ -1,3 +1,5 @@
+import 'package:business_partner_main/views/customers/customers_list_screen.dart';
+import 'package:business_partner_main/views/customers/customer_detail_screen.dart';
 import 'package:business_partner_main/views/dashboard/dashboard_screen.dart';
 import 'package:business_partner_main/views/notifications/notifications_screen.dart';
 import 'package:business_partner_main/views/products/products_screen.dart';
@@ -11,6 +13,7 @@ import 'views/auth/reset_password_screen.dart';
 import 'resources/themes/app_theme.dart';
 import 'services/navigation_service.dart';
 import 'package:business_partner_main/views/profile/profile_screen.dart';
+import 'package:business_partner_main/views/bookings/bookings_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,6 +49,17 @@ class MyApp extends StatelessWidget {
         '/search': (context) => const SearchSuggestionScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/notifications': (context) => const NotificationsScreen(),
+        '/customers': (context) => const CustomersListScreen(),
+        '/bookings': (context) => BookingsScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/customer-detail') {
+          final customer = settings.arguments as Customer;
+          return MaterialPageRoute(
+            builder: (context) => CustomerDetailScreen(customer: customer),
+          );
+        }
+        return null;
       },
     );
   }

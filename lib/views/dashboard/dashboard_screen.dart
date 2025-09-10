@@ -28,12 +28,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     // Additional dashboard feature cards
     final extraCards = [
-      DashboardExtraCard(
-        icon: Icons.people_outline,
-        title: 'Customers',
-        value: '1,032',
-        subtext: 'Total customers',
-        background: Colors.indigo[50]!,
+      GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, '/customers');
+        },
+        child: DashboardExtraCard(
+          icon: Icons.people_outline,
+          title: 'Customers',
+          value: '1,032',
+          subtext: 'Total customers',
+          background: Colors.indigo[50]!,
+        ),
       ),
       DashboardExtraCard(
         icon: Icons.star_half,
@@ -250,20 +255,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _navButton(IconData icon, String label, {bool selected = false}) {
     return GestureDetector(
       onTap: () {
-        // Handle navigation based on the label
-        if (!selected) { // Only navigate if not already selected
+        if (!selected) {
           switch (label) {
+            case "Dashboard":
+              Navigator.pushReplacementNamed(context, '/dashboard');
+              break;
             case "Products":
-              Navigator.pushNamed(context, '/products');
+              Navigator.pushReplacementNamed(context, '/products');
               break;
             case "Bookings":
-              Navigator.pushNamed(context, '/bookings');
+              Navigator.pushReplacementNamed(context, '/bookings');
               break;
             case "Profile":
-              Navigator.pushNamed(context, '/profile');
-              break;
-            case "Dashboard":
-              // Already on dashboard, no navigation needed
+              Navigator.pushReplacementNamed(context, '/profile');
               break;
           }
         }
