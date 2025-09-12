@@ -11,6 +11,65 @@ class LoginViewModel extends BaseViewModel {
 
   LoginViewModel(this._navigationService);
 
+  // Mock sendOtp method (no real OTP generation)
+  Future<void> sendOtp(String emailOrPhone) async {
+    if (emailOrPhone.isEmpty) {
+      setError('Please enter your email or phone number');
+      return;
+    }
+
+    // Basic validation for email or phone format
+    bool isValidEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(emailOrPhone);
+    bool isValidPhone = RegExp(r'^[+]?[0-9]{10,15}$').hasMatch(emailOrPhone);
+    
+    if (!isValidEmail && !isValidPhone) {
+      setError('Please enter a valid email or phone number');
+      return;
+    }
+
+    setState(ViewState.busy);
+
+    try {
+      // Simulate API delay (no actual OTP generation)
+      await Future.delayed(Duration(seconds: 2));
+      
+      // Mock success response
+      setMessage('Ready to verify! Use any 6-digit code.');
+      
+    } catch (e) {
+      setError('An unexpected error occurred: ${e.toString()}');
+    } finally {
+      setState(ViewState.idle);
+    }
+  }
+
+  // Mock verifyOtp method (accepts any 6-digit code)
+  Future<void> verifyOtp(String emailOrPhone, String otpCode) async {
+    if (otpCode.isEmpty || otpCode.length != 6) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setState(ViewState.busy);
+
+    try {
+      // Simulate API delay
+      await Future.delayed(Duration(seconds: 2));
+      
+      // Accept any 6-digit OTP (no validation)
+      setMessage('Login successful!');
+      
+      // Navigate to dashboard
+      await _navigationService.navigateToAndClearStack('/dashboard');
+      
+    } catch (e) {
+      setError('An unexpected error occurred: ${e.toString()}');
+    } finally {
+      setState(ViewState.idle);
+    }
+  }
+
+  // Your existing login method (if needed)
   Future<void> login(String emailOrPhone, String password) async {
     if (emailOrPhone.isEmpty || password.isEmpty) {
       setError('Please enter both email/phone and password');
