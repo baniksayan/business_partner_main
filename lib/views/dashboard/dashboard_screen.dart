@@ -262,11 +262,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onTap: () {
         if (!selected) {
           switch (label) {
+            case "Dashboard":
+              Navigator.pushReplacementNamed(context, '/dashboard');
+              break;
             case "Products":
-              Navigator.pushNamed(context, '/products');
+              Navigator.pushReplacementNamed(context, '/products');
               break;
             case "Bookings":
-              Navigator.pushNamed(context, '/bookings');
+              Navigator.pushReplacementNamed(context, '/bookings');
               break;
             case "Profile":
               Navigator.pushNamed(context, '/profile');

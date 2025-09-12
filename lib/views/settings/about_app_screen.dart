@@ -1,573 +1,768 @@
 import 'package:flutter/material.dart';
-import '../styles/app_colors.dart';
-import '../styles/app_text_styles.dart';
-import '../../widgets/settings-widgets/custom_app_bar.dart';
+import 'package:flutter/services.dart';
+import '../../resources/styles/text_styles.dart';
 
-class AboutAppScreen extends StatelessWidget {
+class AboutAppScreen extends StatefulWidget {
+  const AboutAppScreen({Key? key}) : super(key: key);
+
+  @override
+  State<AboutAppScreen> createState() => _AboutAppScreenState();
+}
+
+class _AboutAppScreenState extends State<AboutAppScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+  bool _isExpanded = false;
+
+  final List<String> _releaseNotes = [
+    'Bug fixes and performance improvements',
+    'Added new analytics dashboard',
+    'Improved customer management features',
+    'Enhanced security measures',
+    'New notification system',
+    'Better user interface design',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      appBar: CustomAppBar(
-        title: 'About',
-        showBackButton: true,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // App Logo/Brand Section
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20.0),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryColor.withOpacity(0.2),
-                    AppColors.accentBeige.withOpacity(0.3),
-                  ],
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // App Logo
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor,
-                      borderRadius: BorderRadius.circular(20.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryColor.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
-                        ),
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Column(
+              children: [
+                // Custom App Bar
+                _buildAppBar(),
+
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+
+                        // App Logo Card
+                        _buildLogoCard(),
+
+                        const SizedBox(height: 24),
+
+                        // App Info Card
+                        _buildAppInfoCard(),
+
+                        const SizedBox(height: 24),
+
+                        // Credits Card
+                        _buildCreditsCard(),
+
+                        const SizedBox(height: 24),
+
+                        // Release History Card
+                        _buildReleaseHistoryCard(),
+
+                        const SizedBox(height: 24),
+
+                        // Action Buttons
+                        _buildActionButtons(),
+
+                        const SizedBox(height: 16),
+
+                        // Legal Links
+                        _buildLegalLinks(),
+
+                        const SizedBox(height: 30),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        'BP',
-                        style: AppTextStyles.heading1.copyWith(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    'MNITURAL',
-                    style: AppTextStyles.heading2.copyWith(
-                      color: AppColors.primaryColor,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Container(
+      height: 70,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Back Button
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF673AB7).withOpacity(0.1),
               ),
             ),
-            SizedBox(height: 32.0),
-            
-            // App Version Card
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: AppColors.cardColor,
-                borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowColor,
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Color(0xFF2C3E50),
+                size: 20,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+
+          const Spacer(),
+
+          // Title with Icon
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF673AB7).withOpacity(0.15),
+                      const Color(0xFF673AB7).withOpacity(0.1),
+                    ],
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF673AB7),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'About',
+                style: AppTextStyles.heading3.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          const Spacer(),
+
+          // Placeholder for symmetry
+          const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF1B5E20),
+            const Color(0xFF2E7D32),
+            const Color(0xFF388E3C),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2E7D32).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Custom Logo Design
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background pattern
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                // Logo text
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'BP',
+                      style: AppTextStyles.heading1.copyWith(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    Container(
+                      width: 30,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          Text(
+            'BUSINESS PARTNER',
+            style: AppTextStyles.heading3.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 3,
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF4CAF50).withOpacity(0.3),
+                  ),
+                ),
+                child: Text(
+                  'v1.0.3 Stable',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: const Color(0xFF4CAF50),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF673AB7).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.mobile_friendly,
+                  color: Color(0xFF673AB7),
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          Text(
+            'PartnerPro',
+            style: AppTextStyles.heading2.copyWith(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Built for Business Partners to manage services, customers, and analytics in one place.',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: Colors.grey[600],
+              height: 1.5,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Features List
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF673AB7).withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Key Features:',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF673AB7),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildFeatureItem('Customer Management System'),
+                _buildFeatureItem('Real-time Analytics Dashboard'),
+                _buildFeatureItem('Booking & Scheduling Tools'),
+                _buildFeatureItem('Payment Processing'),
+                _buildFeatureItem('Business Insights & Reports'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(String feature) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            width: 6,
+            height: 6,
+            decoration: const BoxDecoration(
+              color: Color(0xFF673AB7),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              feature,
+              style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[700]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCreditsCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2196F3).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.code,
+                  color: Color(0xFF2196F3),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Credits',
+                style: AppTextStyles.heading3.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2196F3).withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF2196F3).withOpacity(0.1),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.business_center,
+                  color: Color(0xFF2196F3),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Powered by Future Founders',
+                        style: AppTextStyles.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF2196F3),
+                        ),
+                      ),
+                      Text(
+                        'Professional tech management platform',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReleaseHistoryCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.history,
+                  color: Color(0xFF4CAF50),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Release History',
+                style: AppTextStyles.heading3.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF4CAF50).withOpacity(0.2),
+                ),
               ),
               child: Column(
                 children: [
                   Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.accentGreen.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        child: Icon(
-                          Icons.info_outline,
-                          color: Colors.green[600],
-                          size: 20,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4CAF50),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Version 1.0.3',
+                          style: AppTextStyles.labelMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                      SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'v1.0.3 Stable',
-                              style: AppTextStyles.bodyTextMedium.copyWith(
-                                color: AppColors.successColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              'PartnerPro',
-                              style: AppTextStyles.heading3,
-                            ),
-                          ],
-                        ),
+                      const Spacer(),
+                      Icon(
+                        _isExpanded ? Icons.expand_less : Icons.expand_more,
+                        color: const Color(0xFF4CAF50),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    'Built for Business Partners to manage services, customers, and analytics in one place.',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.greyColor,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+
+                  if (_isExpanded) ...[
+                    const SizedBox(height: 16),
+                    ..._releaseNotes
+                        .map(
+                          (note) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(top: 6),
+                                  width: 4,
+                                  height: 4,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF4CAF50),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    note,
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: Colors.grey[700],
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ],
                 ],
               ),
             ),
-            SizedBox(height: 24.0),
-            
-            // Credits Section
-            _buildInfoSection(
-              title: 'Credits',
-              content: 'Powered by Innovate Solutions',
-              icon: Icons.business_outlined,
-              iconColor: AppColors.primaryColor,
-            ),
-            
-            // Release History Section
-            _buildReleaseHistorySection(),
-            
-            SizedBox(height: 24.0),
-            
-            // Action Buttons
-            Container(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  _showRateUsDialog(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  padding: EdgeInsets.symmetric(vertical: 18.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  elevation: 2,
-                  shadowColor: AppColors.primaryColor.withOpacity(0.3),
-                ),
-                child: Text(
-                  'Rate Us on Play Store',
-                  style: AppTextStyles.buttonText.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Column(
+      children: [
+        // Rate Us Button
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF9C27B0), Color(0xFF673AB7)],
               ),
-            ),
-            SizedBox(height: 16.0),
-            Container(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  _showShareDialog(context);
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 18.0),
-                  side: BorderSide(color: AppColors.primaryColor, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF9C27B0).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
-                child: Text(
-                  'Share This App',
-                  style: AppTextStyles.buttonText.copyWith(
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ),
+              ],
             ),
-            SizedBox(height: 32.0),
-            
-            // Terms & Privacy Footer
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    // Navigate to Terms & Privacy
-                  },
-                  child: Text(
-                    'Terms & Privacy',
-                    style: AppTextStyles.captionText.copyWith(
-                      color: AppColors.primaryColor,
-                      fontWeight: FontWeight.w500,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Thank you for your feedback!'),
+                    backgroundColor: const Color(0xFF4CAF50),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ],
+              ),
+              icon: const Icon(Icons.star_outline, size: 20),
+              label: Text(
+                'Rate Us on Play Store',
+                style: AppTextStyles.buttonMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-            SizedBox(height: 16.0),
-          ],
+          ),
         ),
-      ),
-    );
-  }
 
-  Widget _buildInfoSection({
-    required String title,
-    required String content,
-    required IconData icon,
-    required Color iconColor,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.only(bottom: 16.0),
-      padding: EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: AppColors.cardColor,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-          ),
-          SizedBox(width: 16.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.bodyTextMedium,
-                ),
-                SizedBox(height: 4.0),
-                Text(
-                  content,
-                  style: AppTextStyles.captionText,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        const SizedBox(height: 12),
 
-  Widget _buildReleaseHistorySection() {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.only(bottom: 16.0),
-      padding: EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: AppColors.cardColor,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.accentOrange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Icon(
-                  Icons.history,
-                  color: Colors.orange[600],
-                  size: 20,
-                ),
-              ),
-              SizedBox(width: 16.0),
-              Text(
-                'Release History',
-                style: AppTextStyles.bodyTextMedium,
-              ),
-            ],
-          ),
-          SizedBox(height: 16.0),
-          
-          // Version History
-          _buildVersionItem(
-            version: 'Version 1.0.3',
-            date: 'Latest Update',
-            features: [
-              'Bug fixes and performance improvements',
-              'Added new analytics dashboard',
-              'Improved customer management features',
-            ],
-            isLatest: true,
-          ),
-          
-          SizedBox(height: 12.0),
-          
-          _buildVersionItem(
-            version: 'Version 1.0.2',
-            date: '2024-01-15',
-            features: [
-              'Enhanced booking system',
-              'New notification settings',
-              'UI/UX improvements',
-            ],
-            isLatest: false,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVersionItem({
-    required String version,
-    required String date,
-    required List<String> features,
-    required bool isLatest,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: isLatest ? AppColors.primaryColor.withOpacity(0.05) : AppColors.lightGreyColor,
-        borderRadius: BorderRadius.circular(12.0),
-        border: isLatest ? Border.all(color: AppColors.primaryColor.withOpacity(0.2)) : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                version,
-                style: AppTextStyles.bodyTextMedium.copyWith(
-                  color: isLatest ? AppColors.primaryColor : AppColors.textColor,
-                ),
-              ),
-              Spacer(),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: isLatest ? AppColors.primaryColor : AppColors.greyColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  date,
-                  style: AppTextStyles.smallText.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.0),
-          ...features.map((feature) => Padding(
-            padding: EdgeInsets.only(bottom: 4.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('• ', style: AppTextStyles.captionText),
-                Expanded(
-                  child: Text(
-                    feature,
-                    style: AppTextStyles.captionText,
-                  ),
-                ),
-              ],
-            ),
-          )),
-        ],
-      ),
-    );
-  }
-
-  void _showRateUsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.star,
-              color: Colors.amber,
-              size: 28,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Rate Our App',
-              style: AppTextStyles.heading3,
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'If you enjoy using our app, please take a moment to rate it. Your feedback helps us improve!',
-              style: AppTextStyles.bodyText,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) => 
-                Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                  size: 32,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Later',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.greyColor,
-              ),
-            ),
-          ),
-          ElevatedButton(
+        // Share App Button
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: OutlinedButton.icon(
             onPressed: () {
-              Navigator.pop(context);
+              Clipboard.setData(
+                const ClipboardData(
+                  text: 'Check out this amazing Business Partner app!',
+                ),
+              );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Thank you for your rating!'),
-                  backgroundColor: AppColors.successColor,
+                  content: const Text('App link copied to clipboard!'),
+                  backgroundColor: const Color(0xFF4FC3F7),
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF673AB7),
+              side: BorderSide(color: const Color(0xFF673AB7).withOpacity(0.5)),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: Text(
-              'Rate Now',
-              style: AppTextStyles.buttonText.copyWith(
-                color: Colors.white,
+            icon: const Icon(Icons.share_outlined, size: 20),
+            label: Text(
+              'Share This App',
+              style: AppTextStyles.buttonMedium.copyWith(
+                color: const Color(0xFF673AB7),
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  void _showShareDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.share,
-              color: AppColors.primaryColor,
-              size: 28,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Share App',
-              style: AppTextStyles.heading3,
-            ),
-          ],
-        ),
-        content: Text(
-          'Share this amazing business partner app with your friends and colleagues!',
-          style: AppTextStyles.bodyText,
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.greyColor,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Share link copied to clipboard!'),
-                  backgroundColor: AppColors.successColor,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
+  Widget _buildLegalLinks() {
+    return Center(
+      child: TextButton(
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Legal information available in Settings'),
+              backgroundColor: const Color(0xFF4FC3F7),
+              behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              'Share',
-              style: AppTextStyles.buttonText.copyWith(
-                color: Colors.white,
-              ),
-            ),
+          );
+        },
+        child: Text(
+          'Terms & Privacy',
+          style: AppTextStyles.linkText.copyWith(
+            color: Colors.grey[500],
+            decoration: TextDecoration.underline,
           ),
-        ],
+        ),
       ),
     );
   }

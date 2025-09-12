@@ -11,33 +11,46 @@ class ProductsScreen extends StatefulWidget {
   State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
-class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStateMixin {
+class _ProductsScreenState extends State<ProductsScreen>
+    with TickerProviderStateMixin {
   final List<Product> _products = [
     Product(
       id: '1',
       image: "assets/images/avocado.png",
       name: "Organic Avocado",
       price: "₹29.99",
-      description: "Fresh, creamy organic avocados perfect for salads, toast, and smoothies.",
+      description:
+          "Fresh, creamy organic avocados perfect for salads, toast, and smoothies.",
       category: "Fruits",
       stock: 25,
       inStock: true,
       rating: 4.5,
       reviewCount: 128,
-      features: ['100% Organic', 'Rich in Healthy Fats', 'Farm Fresh', 'No Pesticides'],
+      features: [
+        '100% Organic',
+        'Rich in Healthy Fats',
+        'Farm Fresh',
+        'No Pesticides',
+      ],
     ),
     Product(
       id: '2',
       image: "assets/images/strawberry.png",
       name: "Fresh Strawberries",
       price: "₹19.99",
-      description: "Sweet, juicy strawberries bursting with flavor and vitamins.",
+      description:
+          "Sweet, juicy strawberries bursting with flavor and vitamins.",
       category: "Fruits",
       stock: 15,
       inStock: true,
       rating: 4.8,
       reviewCount: 85,
-      features: ['Vitamin C Rich', 'Antioxidants', 'Fresh Picked', 'Sweet & Juicy'],
+      features: [
+        'Vitamin C Rich',
+        'Antioxidants',
+        'Fresh Picked',
+        'Sweet & Juicy',
+      ],
     ),
     Product(
       id: '3',
@@ -90,7 +103,10 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeIn);
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    );
     _fadeController.forward();
   }
 
@@ -145,7 +161,11 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
                 children: [
                   ElevatedButton.icon(
                     onPressed: _showSortBottomSheet,
-                    icon: const Icon(Icons.sort_rounded, color: Color(0xFF4FC3F7), size: 20),
+                    icon: const Icon(
+                      Icons.sort_rounded,
+                      color: Color(0xFF4FC3F7),
+                      size: 20,
+                    ),
                     label: const Text(
                       'Sort',
                       style: TextStyle(
@@ -171,13 +191,17 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
             ),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
-                itemCount: _products.length,
-                itemBuilder: (context, i) => AnimatedProductCard(
-                  product: _products[i],
-                  delay: 80 * i,
-                  onEdit: () => _editProduct(_products[i]),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 5,
                 ),
+                itemCount: _products.length,
+                itemBuilder:
+                    (context, i) => AnimatedProductCard(
+                      product: _products[i],
+                      delay: 80 * i,
+                      onEdit: () => _editProduct(_products[i]),
+                    ),
               ),
             ),
             Padding(
@@ -216,37 +240,38 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Sort Products',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2C3E50),
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            const SizedBox(height: 20),
-            _sortOption('Name (A-Z)', Icons.sort_by_alpha),
-            _sortOption('Price (Low to High)', Icons.arrow_upward),
-            _sortOption('Price (High to Low)', Icons.arrow_downward),
-            _sortOption('Recently Added', Icons.access_time),
-            const SizedBox(height: 10),
-          ],
-        ),
-      ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Sort Products',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2C3E50),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _sortOption('Name (A-Z)', Icons.sort_by_alpha),
+                _sortOption('Price (Low to High)', Icons.arrow_upward),
+                _sortOption('Price (High to Low)', Icons.arrow_downward),
+                _sortOption('Recently Added', Icons.access_time),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
     );
   }
 
@@ -268,7 +293,9 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
             content: Text('Sorted by: $title'),
             backgroundColor: const Color(0xFF4FC3F7),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       },
@@ -291,9 +318,7 @@ class _ProductsScreenState extends State<ProductsScreen> with TickerProviderStat
   void _addNewProduct() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AddProductScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const AddProductScreen()),
     );
   }
 }
