@@ -1,6 +1,5 @@
-// File: lib/widgets/common/custom_tab_navigation.dart
+// lib/widgets/common/custom_tab_navigation.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class CustomTabNavigation extends StatelessWidget {
   final List<String> tabs;
@@ -17,54 +16,47 @@ class CustomTabNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(4),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(15),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: tabs.asMap().entries.map((entry) {
-          int index = entry.key;
-          String title = entry.value;
-          return _buildTab(title, index);
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildTab(String title, int index) {
-    final isSelected = selectedTab == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          onTabChanged(index);
-          HapticFeedback.lightImpact();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected ? [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+          final index = entry.key;
+          final tab = entry.value;
+          final isSelected = selectedTab == index;
+          
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onTabChanged(index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF4FC3F7) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  tab,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? Colors.white : const Color(0xFF2C3E50),
+                    fontFamily: "Inter",
+                  ),
+                ),
               ),
-            ] : null,
-          ),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? const Color(0xFF4FC3F7) : Colors.grey[600],
             ),
-          ),
-        ),
+          );
+        }).toList(),
       ),
     );
   }

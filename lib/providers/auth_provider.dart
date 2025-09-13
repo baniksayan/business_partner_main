@@ -1,9 +1,8 @@
-// lib/providers/auth_provider.dart
+// lib/providers/auth_provider.dart - FIXED TOKEN STORAGE
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_api_service.dart';
-import '../services/api_exceptions.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isAuthenticated = false;
@@ -13,69 +12,35 @@ class AuthProvider with ChangeNotifier {
   String? _userEmail;
   String? _errorMessage;
   Map<String, dynamic>? _currentUser;
+  DateTime? _loginTime;
+  
+  static const Duration sessionTimeout = Duration(hours: 24);
 
   // Getters
-  bool get isAuthenticated => _isAuthenticated;
+  bool get isAuthenticated {
+    if (!_isAuthenticated) return false;
+    if (_token == null || _token!.isEmpty) return false;
+    if (_loginTime == null) return false;
+    
+    final sessionExpired = DateTime.now().difference(_loginTime!) > sessionTimeout;
+    if (sessionExpired) {
+      print('⚠️ Session expired, clearing auth state');
+      _clearAuthStateInMemory();
+      return false;
+    }
+    
+    return true;
+  }
+
   bool get isLoading => _isLoading;
   String? get token => _token;
-  String? get refreshTokenValue => _refreshToken; // **RENAMED: from refreshToken to refreshTokenValue**
-  String? get userEmail => _userEmail;
+  String? get refreshTokenValue => _refreshToken;
   String? get errorMessage => _errorMessage;
   Map<String, dynamic>? get currentUser => _currentUser;
+  bool get isSessionExpired => _loginTime == null || DateTime.now().difference(_loginTime!) > sessionTimeout;
 
-  /// **USER ROLES MANAGEMENT**
-  
-  List<int> get userRoles {
-    if (_currentUser != null && _currentUser!['roles'] != null) {
-      final roles = _currentUser!['roles'];
-      
-      if (roles is List) {
-        return List<int>.from(roles);
-      } else if (roles is String) {
-        return roles
-            .split(',')
-            .map((e) => int.tryParse(e.trim()) ?? 0)
-            .where((e) => e != 0)
-            .toList();
-      } else if (roles is int) {
-        return [roles];
-      }
-    }
-    
-    if (_userEmail != null) {
-      final email = _userEmail!.toLowerCase();
-      if (email.contains('business') || 
-          email.contains('partner') || 
-          email.contains('admin')) {
-        return [2];
-      }
-    }
-    
-    return [];
-  }
-
-  bool get isBusinessPartner {
-    return userRoles.contains(2);
-  }
-
-  bool get isAdmin {
-    return userRoles.contains(1);
-  }
-
-  bool get isEndUser {
-    return userRoles.contains(3);
-  }
-
-  bool hasRole(int roleId) {
-    return userRoles.contains(roleId);
-  }
-
-  bool hasAnyRole(List<int> roleIds) {
-    return roleIds.any((roleId) => userRoles.contains(roleId));
-  }
-
-  /// **USER PROFILE INFORMATION**
-
+  // User getters
+  String get userEmail => _currentUser?['email']?.toString() ?? _userEmail ?? '';
   String get userName {
     if (_currentUser != null) {
       final firstName = _currentUser!['first_name']?.toString().trim() ?? '';
@@ -86,67 +51,39 @@ class AuthProvider with ChangeNotifier {
       }
       
       final name = _currentUser!['name']?.toString().trim();
-      if (name != null && name.isNotEmpty) {
-        return name;
-      }
+      if (name != null && name.isNotEmpty) return name;
       
       final email = _currentUser!['email']?.toString();
       if (email != null && email.contains('@')) {
         return email.split('@')[0];
       }
     }
-    
     return 'User';
   }
 
-  String get userFirstName {
-    return _currentUser?['first_name']?.toString().trim() ?? 'User';
-  }
+  String get userFirstName => _currentUser?['first_name']?.toString().trim() ?? 'User';
+  String get userLastName => _currentUser?['last_name']?.toString().trim() ?? '';
+  String? get userProfilePicture => _currentUser?['image_url']?.toString();
+  String get userPhone => _currentUser?['phone']?.toString() ?? '';
+  String get userId => _currentUser?['id']?.toString() ?? '0';
+  String get businessName => _currentUser?['business_name']?.toString() ?? 'My Business';
+  String get businessCategory => _currentUser?['business_category']?.toString() ?? 'General';
 
-  String get userLastName {
-    return _currentUser?['last_name']?.toString().trim() ?? '';
-  }
-
-  String? get userProfilePicture {
-    final imageUrl = _currentUser?['image_url']?.toString();
-    if (imageUrl != null && imageUrl.isNotEmpty && imageUrl != 'null') {
-      return imageUrl;
+  List<int> get userRoles {
+    if (_currentUser != null && _currentUser!['roles'] != null) {
+      final roles = _currentUser!['roles'];
+      if (roles is List) return List<int>.from(roles);
+      if (roles is String) {
+        return roles.split(',').map((e) => int.tryParse(e.trim()) ?? 0).where((e) => e != 0).toList();
+      }
+      if (roles is int) return [roles];
     }
-    
-    final profilePic = _currentUser?['profile_picture']?.toString();
-    if (profilePic != null && profilePic.isNotEmpty && profilePic != 'null') {
-      return profilePic;
-    }
-    
-    final avatar = _currentUser?['avatar']?.toString();
-    if (avatar != null && avatar.isNotEmpty && avatar != 'null') {
-      return avatar;
-    }
-    
-    return null;
+    return [2]; // Default business partner
   }
 
-  String get userPhone {
-    final phone = _currentUser?['phone']?.toString() ?? 
-                 _currentUser?['phone_number']?.toString() ?? 
-                 _currentUser?['mobile']?.toString();
-    
-    if (phone != null && phone.isNotEmpty && phone != 'null') {
-      return phone;
-    }
-    
-    return '';
-  }
-
-  String get userId {
-    return _currentUser?['id']?.toString() ?? '0';
-  }
-
-  bool get isUserActive {
-    return _currentUser?['is_active'] == true;
-  }
-
-  /// **STATE MANAGEMENT**
+  bool get isBusinessPartner => userRoles.contains(2);
+  bool get isAdmin => userRoles.contains(1);
+  bool get isEndUser => userRoles.contains(3);
 
   void _setLoading(bool loading) {
     _isLoading = loading;
@@ -163,8 +100,217 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// **AUTHENTICATION METHODS**
+  // **CRITICAL: Fixed verifyOtp method with proper token storage**
+// lib/providers/auth_provider.dart - FIXED verifyOtp method
+Future<bool> verifyOtp(String emailOrPhone, String otp) async {
+  print('🔄 AuthProvider: Starting OTP verification for $emailOrPhone');
+  _setLoading(true);
+  _setError(null);
 
+  try {
+    final response = await AuthApiService.verifyOtp(emailOrPhone, otp);
+    
+    if (response.success) {
+      print('✅ AuthProvider: OTP verification API successful');
+      print('📦 AuthProvider: Full API Response: ${response.data}');
+      
+      // **CRITICAL FIX: Extract tokens from the nested 'data' field**
+      final responseData = response.data?['data']; // <-- This is the key fix!
+      
+      if (responseData == null) {
+        print('❌ AuthProvider: No data field in response');
+        _setError('Invalid response format from server');
+        _setLoading(false);
+        return false;
+      }
+      
+      // Extract tokens from the correct nested location
+      final accessToken = responseData['access_token']?.toString();
+      final refreshToken = responseData['refresh_token']?.toString();
+      
+      print('🔍 AuthProvider: Extracted from responseData:');
+      print('  - Access Token: ${accessToken != null ? "EXISTS (${accessToken.length} chars)" : "NULL"}');
+      print('  - Refresh Token: ${refreshToken != null ? "EXISTS" : "NULL"}');
+      
+      if (accessToken == null || accessToken.isEmpty) {
+        print('❌ AuthProvider: No access token found in response data');
+        _setError('Authentication failed - no token received');
+        _setLoading(false);
+        return false;
+      }
+      
+      // **STEP 1: Set authentication data**
+      _token = accessToken;
+      _refreshToken = refreshToken;
+      _userEmail = emailOrPhone;
+      _loginTime = DateTime.now();
+      _isAuthenticated = true;
+      
+      print('✅ AuthProvider: Authentication data set:');
+      print('  - Token: ${_token!.substring(0, 30)}...');
+      print('  - Email: $_userEmail');
+      print('  - Login time: $_loginTime');
+      print('  - Authenticated: $_isAuthenticated');
+      
+      // **STEP 2: Process user data from the correct nested location**
+      if (responseData['user'] != null) {
+        _currentUser = Map<String, dynamic>.from(responseData['user']);
+        print('✅ User data loaded from API:');
+        print('  - User ID: ${_currentUser!['id']}');
+        print('  - User Email: ${_currentUser!['email']}');
+        print('  - User Roles: ${_currentUser!['roles']}');
+      } else {
+        _currentUser = _createFallbackUserData(emailOrPhone);
+        print('✅ User data: Created fallback');
+      }
+
+      _ensureUserRoles();
+      
+      // **STEP 3: Save to persistent storage**
+      final saveSuccess = await _saveAuthData();
+      if (!saveSuccess) {
+        print('❌ AuthProvider: CRITICAL - Failed to save auth data to storage');
+        _setError('Failed to save authentication data');
+        _setLoading(false);
+        return false;
+      }
+      
+      // **STEP 4: Final verification**
+      final finalCheck = isAuthenticated;
+      print('✅ AuthProvider: Final authentication check: $finalCheck');
+      print('✅ AuthProvider: Token ready for API calls: ${_token!.substring(0, 30)}...');
+      
+      _setLoading(false);
+      notifyListeners();
+      print('🎉 AuthProvider: OTP verification completed successfully');
+      return true;
+      
+    } else {
+      _setError(response.error ?? 'Invalid OTP');
+      _setLoading(false);
+      print('❌ AuthProvider: OTP verification failed: ${response.error}');
+      return false;
+    }
+  } catch (e) {
+    _setError('Network error occurred');
+    _setLoading(false);
+    print('🚨 AuthProvider: Exception in verifyOtp: $e');
+    return false;
+  }
+}
+
+
+  // **CRITICAL: Enhanced save method with validation**
+  Future<bool> _saveAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      print('💾 AuthProvider: Saving authentication data to local storage...');
+      
+      if (_token == null || _token!.isEmpty) {
+        print('❌ AuthProvider: Cannot save - no token available');
+        return false;
+      }
+      
+      // Save all authentication data
+      await prefs.setString('auth_token', _token!);
+      print('  ✅ Token saved (${_token!.length} chars)');
+      
+      if (_refreshToken != null) {
+        await prefs.setString('refresh_token', _refreshToken!);
+        print('  ✅ Refresh token saved');
+      }
+      
+      if (_userEmail != null) {
+        await prefs.setString('user_email', _userEmail!);
+        print('  ✅ Email saved: $_userEmail');
+      }
+      
+      if (_currentUser != null) {
+        await prefs.setString('current_user', jsonEncode(_currentUser!));
+        print('  ✅ User data saved');
+      }
+      
+      if (_loginTime != null) {
+        await prefs.setString('login_time', _loginTime!.toIso8601String());
+        print('  ✅ Login time saved: $_loginTime');
+      }
+      
+      await prefs.setBool('is_authenticated', _isAuthenticated);
+      await prefs.setString('last_activity', DateTime.now().toIso8601String());
+      
+      // **VERIFICATION: Read back to confirm**
+      final savedToken = prefs.getString('auth_token');
+      if (savedToken == null || savedToken != _token) {
+        print('❌ AuthProvider: Token verification failed after save');
+        return false;
+      }
+      
+      print('✅ AuthProvider: All auth data saved and verified successfully');
+      return true;
+      
+    } catch (e) {
+      print('❌ AuthProvider: CRITICAL - Failed to save auth data: $e');
+      return false;
+    }
+  }
+
+  // Load authentication data on app start
+  Future<void> loadAuthData() async {
+    print('🔄 AuthProvider: Loading authentication data from local storage...');
+    _setLoading(true);
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Load all data
+      _token = prefs.getString('auth_token');
+      _refreshToken = prefs.getString('refresh_token');
+      _userEmail = prefs.getString('user_email');
+      _isAuthenticated = prefs.getBool('is_authenticated') ?? false;
+      
+      final loginTimeString = prefs.getString('login_time');
+      if (loginTimeString != null) {
+        _loginTime = DateTime.parse(loginTimeString);
+      }
+      
+      final userDataString = prefs.getString('current_user');
+      if (userDataString != null && userDataString.isNotEmpty) {
+        _currentUser = jsonDecode(userDataString);
+      }
+      
+      print('📖 AuthProvider: Loaded from storage:');
+      print('  - Token exists: ${_token != null && _token!.isNotEmpty}');
+      print('  - Email: $_userEmail');
+      print('  - Authenticated flag: $_isAuthenticated');
+      print('  - Login time: $_loginTime');
+      print('  - Session expired: $isSessionExpired');
+      
+      // Validate loaded data
+      if (_isAuthenticated) {
+        if (_token == null || _token!.isEmpty || _userEmail == null || isSessionExpired) {
+          print('⚠️ AuthProvider: Invalid session data found, clearing...');
+          await logout();
+        } else {
+          print('✅ AuthProvider: Valid session loaded - token ready for API calls');
+          print('✅ AuthProvider: Token: ${_token!.substring(0, 20)}...');
+          // Update activity
+          await prefs.setString('last_activity', DateTime.now().toIso8601String());
+        }
+      } else {
+        print('ℹ️ AuthProvider: No authenticated session found');
+      }
+      
+    } catch (e) {
+      print('❌ AuthProvider: Error loading auth data: $e');
+      await _clearAuthData();
+    } finally {
+      _setLoading(false);
+      notifyListeners();
+    }
+  }
+
+  // Send OTP
   Future<bool> sendOtp(String emailOrPhone) async {
     _setLoading(true);
     _setError(null);
@@ -175,78 +321,132 @@ class AuthProvider with ChangeNotifier {
       if (response.success) {
         _userEmail = emailOrPhone;
         _setLoading(false);
-        print('✅ OTP sent successfully to $emailOrPhone');
         return true;
       } else {
         _setError(response.error ?? 'Failed to send OTP');
         _setLoading(false);
-        print('❌ Failed to send OTP: ${response.error}');
         return false;
       }
     } catch (e) {
-      _setError('Network error occurred. Please try again.');
+      _setError('Network error occurred');
       _setLoading(false);
-      print('🚨 Exception in sendOtp: $e');
       return false;
     }
   }
 
-  Future<bool> verifyOtp(String emailOrPhone, String otp) async {
+  // **TOKEN-BASED API METHODS**
+  
+  // Update user profile using stored token
+  Future<bool> updateUserProfile(Map<String, dynamic> userData) async {
+    if (!isAuthenticated || _token == null) {
+      _setError('Not authenticated - please log in');
+      return false;
+    }
+
+    print('🔄 AuthProvider: Updating profile with token: ${_token!.substring(0, 20)}...');
     _setLoading(true);
     _setError(null);
 
     try {
-      final response = await AuthApiService.verifyOtp(emailOrPhone, otp);
+      final response = await AuthApiService.updateUserProfile(_token!, userData);
       
       if (response.success) {
-        _token = response.data?['access_token']?.toString() ?? 
-                response.data?['token']?.toString();
-        _refreshToken = response.data?['refresh_token']?.toString();
-        _userEmail = emailOrPhone;
-        _isAuthenticated = true;
-        
-        if (response.data?['user'] != null) {
-          _currentUser = Map<String, dynamic>.from(response.data!['user']);
-        } else {
-          print('⚠️ No user data from API, creating fallback user data');
-          _currentUser = _createFallbackUserData(emailOrPhone);
+        if (_currentUser != null) {
+          _currentUser!.addAll(userData);
         }
-
-        _ensureUserRoles();
-        
-        print('✅ User authenticated successfully');
-        print('🔍 User data: $_currentUser');
-        print('🔍 User roles: $userRoles');
-        print('🔍 Is business partner: $isBusinessPartner');
-        print('🔍 User name: $userName');
-        
-        await _saveAuthData();
+        await _saveAuthData(); // Save updated user data
         _setLoading(false);
+        notifyListeners();
+        print('✅ AuthProvider: Profile updated successfully');
         return true;
       } else {
-        _setError(response.error ?? 'Invalid OTP. Please try again.');
+        _setError(response.error ?? 'Failed to update profile');
         _setLoading(false);
-        print('❌ OTP verification failed: ${response.error}');
         return false;
       }
     } catch (e) {
-      _setError('Network error occurred. Please try again.');
+      _setError('Network error occurred');
       _setLoading(false);
-      print('🚨 Exception in verifyOtp: $e');
       return false;
+    }
+  }
+
+  // Get fresh user data from server using stored token
+  Future<bool> refreshUserData() async {
+    if (!isAuthenticated || _token == null) return false;
+
+    print('🔄 AuthProvider: Refreshing user data with token: ${_token!.substring(0, 20)}...');
+
+    try {
+      final response = await AuthApiService.getUserProfile(_token!);
+      
+      if (response.success && response.data != null) {
+        _currentUser = Map<String, dynamic>.from(response.data!);
+        await _saveAuthData();
+        notifyListeners();
+        print('✅ AuthProvider: User data refreshed successfully');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('❌ AuthProvider: Error refreshing user data: $e');
+      return false;
+    }
+  }
+
+  // Logout and clear all stored data
+  Future<void> logout() async {
+    print('🔄 AuthProvider: Logging out...');
+    
+    try {
+      if (_token != null) {
+        await AuthApiService.logout(_token!);
+        print('✅ AuthProvider: Logout API called with token');
+      }
+    } catch (e) {
+      print('⚠️ AuthProvider: Logout API failed: $e');
+    }
+    
+    // Clear all state
+    _clearAuthStateInMemory();
+    await _clearAuthData();
+    
+    print('✅ AuthProvider: Logout completed - all data cleared');
+    notifyListeners();
+  }
+
+  // Helper methods
+  void _clearAuthStateInMemory() {
+    _isAuthenticated = false;
+    _token = null;
+    _refreshToken = null;
+    _userEmail = null;
+    _currentUser = null;
+    _errorMessage = null;
+    _loginTime = null;
+  }
+
+  Future<void> _clearAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      await prefs.remove('refresh_token');
+      await prefs.remove('user_email');
+      await prefs.remove('current_user');
+      await prefs.remove('is_authenticated');
+      await prefs.remove('login_time');
+      await prefs.remove('last_activity');
+      print('✅ AuthProvider: All storage data cleared');
+    } catch (e) {
+      print('⚠️ AuthProvider: Error clearing storage: $e');
     }
   }
 
   void _ensureUserRoles() {
     if (_currentUser != null) {
       final roles = _currentUser!['roles'];
-      
-      if (roles == null || 
-          (roles is List && roles.isEmpty) ||
-          (roles is String && roles.trim().isEmpty)) {
-        
-        print('⚠️ No roles found in user data, assigning default business partner role');
-        _currentUser!['roles'] = [2];
+      if (roles == null || (roles is List && roles.isEmpty)) {
+        _currentUser!['roles'] = [2]; // Default business partner role
       }
     }
   }
@@ -258,16 +458,14 @@ class AuthProvider with ChangeNotifier {
     return {
       'id': DateTime.now().millisecondsSinceEpoch,
       'email': email,
-      'first_name': nameParts.isNotEmpty 
-          ? _capitalize(nameParts[0]) 
-          : 'Business',
-      'last_name': nameParts.length > 1 
-          ? _capitalize(nameParts[1]) 
-          : 'Partner',
-      'roles': [2],
+      'first_name': nameParts.isNotEmpty ? _capitalize(nameParts[0]) : 'Business',
+      'last_name': nameParts.length > 1 ? _capitalize(nameParts[1]) : 'Partner',
+      'roles': [2], // Business partner role
       'is_active': true,
       'phone': '',
       'image_url': null,
+      'business_name': 'My Business',
+      'business_category': 'General',
       'created_at': DateTime.now().toIso8601String(),
     };
   }
@@ -277,202 +475,25 @@ class AuthProvider with ChangeNotifier {
     return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 
-  Future<void> logout() async {
-    try {
-      if (_token != null) {
-        await AuthApiService.logout(_token!);
-        print('✅ Logout API called successfully');
+  Future<void> refreshSession() async {
+    if (isAuthenticated) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('last_activity', DateTime.now().toIso8601String());
+      } catch (e) {
+        print('⚠️ AuthProvider: Session refresh failed: $e');
       }
-    } catch (e) {
-      print('⚠️ Logout API call failed: $e');
-    }
-    
-    _isAuthenticated = false;
-    _token = null;
-    _refreshToken = null;
-    _userEmail = null;
-    _currentUser = null;
-    _errorMessage = null;
-    
-    await _clearAuthData();
-    
-    print('✅ User logged out successfully');
-    notifyListeners();
-  }
-
-  /// **DATA PERSISTENCE**
-
-  Future<void> _saveAuthData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      if (_token != null) {
-        await prefs.setString('auth_token', _token!);
-      }
-      
-      if (_refreshToken != null) {
-        await prefs.setString('refresh_token', _refreshToken!);
-      }
-      
-      if (_userEmail != null) {
-        await prefs.setString('user_email', _userEmail!);
-      }
-      
-      if (_currentUser != null) {
-        await prefs.setString('current_user', jsonEncode(_currentUser!));
-      }
-      
-      await prefs.setBool('is_authenticated', _isAuthenticated);
-      await prefs.setString('last_login', DateTime.now().toIso8601String());
-      
-      print('✅ Auth data saved to local storage');
-    } catch (e) {
-      print('⚠️ Failed to save auth data: $e');
     }
   }
 
-  Future<void> loadAuthData() async {
-    _setLoading(true);
-    
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      _token = prefs.getString('auth_token');
-      _refreshToken = prefs.getString('refresh_token');
-      _userEmail = prefs.getString('user_email');
-      _isAuthenticated = prefs.getBool('is_authenticated') ?? false;
-      
-      final userDataString = prefs.getString('current_user');
-      if (userDataString != null && userDataString.isNotEmpty) {
-        _currentUser = jsonDecode(userDataString);
-      }
-      
-      if (_isAuthenticated && (_token == null || _userEmail == null)) {
-        print('⚠️ Invalid auth data found, clearing...');
-        await logout();
-      } else if (_isAuthenticated) {
-        print('✅ Auth data loaded successfully for ${_userEmail}');
-        print('🔍 User roles: $userRoles');
-        print('🔍 Is business partner: $isBusinessPartner');
-      }
-      
-    } catch (e) {
-      print('⚠️ Error loading auth data: $e');
-      await _clearAuthData();
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> _clearAuthData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      await prefs.remove('auth_token');
-      await prefs.remove('refresh_token');
-      await prefs.remove('user_email');
-      await prefs.remove('current_user');
-      await prefs.remove('is_authenticated');
-      await prefs.remove('last_login');
-      
-      print('✅ Auth data cleared from local storage');
-    } catch (e) {
-      print('⚠️ Error clearing auth data: $e');
-    }
-  }
-
-  /// **USER DATA MANAGEMENT**
-
-  Future<void> updateUserData(Map<String, dynamic> userData) async {
-    _currentUser = Map<String, dynamic>.from(userData);
-    await _saveAuthData();
-    notifyListeners();
-    print('✅ User data updated');
-  }
-
-  Future<void> updateUserField(String key, dynamic value) async {
-    if (_currentUser != null) {
-      _currentUser![key] = value;
-      await _saveAuthData();
-      notifyListeners();
-      print('✅ User field $key updated');
-    }
-  }
-
-  Future<bool> refreshUserData() async {
-    if (!_isAuthenticated || _token == null) {
-      return false;
-    }
-
-    try {
-      // You can implement this if you have a user profile API endpoint
-      // final response = await AuthApiService.getUserProfile(_token!);
-      // if (response.success) {
-      //   _currentUser = response.data;
-      //   await _saveAuthData();
-      //   notifyListeners();
-      //   return true;
-      // }
-    } catch (e) {
-      print('⚠️ Error refreshing user data: $e');
-    }
-    
-    return false;
-  }
-
-  /// **TOKEN MANAGEMENT**
-
-  bool get isTokenExpired {
-    return _token == null;
-  }
-
-  // **RENAMED: from refreshToken() to refreshAuthToken()**
-  Future<bool> refreshAuthToken() async {
-    if (_refreshToken == null) {
-      return false;
-    }
-
-    try {
-      // Implement token refresh API call
-      // final response = await AuthApiService.refreshToken(_refreshToken!);
-      // if (response.success) {
-      //   _token = response.data['access_token'];
-      //   await _saveAuthData();
-      //   return true;
-      // }
-    } catch (e) {
-      print('⚠️ Error refreshing token: $e');
-    }
-    
-    return false;
-  }
-
-  /// **UTILITY METHODS**
-
-  String getUserDebugInfo() {
-    return '''
-==========================================
-🔍 USER DEBUG INFORMATION
-==========================================
-User ID: $userId
-Name: $userName
-First Name: $userFirstName
-Last Name: $userLastName
-Email: ${_userEmail ?? 'N/A'}
-Phone: ${userPhone.isNotEmpty ? userPhone : 'N/A'}
-Profile Picture: ${userProfilePicture ?? 'N/A'}
-Roles: $userRoles
-Is Business Partner: $isBusinessPartner
-Is Admin: $isAdmin
-Is End User: $isEndUser
-Is Active: $isUserActive
-Is Authenticated: $isAuthenticated
-Token Exists: ${_token != null}
-==========================================
-''';
-  }
-
-  void printDebugInfo() {
-    print(getUserDebugInfo());
+  void debugAuthState() {
+    print('🔍 AuthProvider Debug State:');
+    print('  - _isAuthenticated: $_isAuthenticated');
+    print('  - _token: ${_token != null ? "EXISTS (${_token!.length})" : "NULL"}');
+    print('  - _userEmail: $_userEmail');
+    print('  - _loginTime: $_loginTime');
+    print('  - isSessionExpired: $isSessionExpired');
+    print('  - isAuthenticated (getter): $isAuthenticated');
+    print('  - userRoles: $userRoles');
   }
 }

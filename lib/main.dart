@@ -1,3 +1,4 @@
+// lib/main.dart - FIXED VERSION
 import 'package:business_partner_main/views/customers/customers_list_screen.dart';
 import 'package:business_partner_main/views/customers/customer_detail_screen.dart';
 import 'package:business_partner_main/views/dashboard/dashboard_screen.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 
 // Updated imports for API integration
 import 'providers/auth_provider.dart';
+import 'providers/product_provider.dart';
 import 'viewmodels/auth/login_viewmodel.dart';
 
 // Core screens
@@ -24,13 +26,8 @@ import 'services/navigation_service.dart';
 import 'package:business_partner_main/views/profile/profile_screen.dart';
 import 'package:business_partner_main/views/bookings/bookings_screen.dart';
 
-// Profile screens
-import 'package:business_partner_main/views/profile/profile_screen.dart';
-import 'package:business_partner_main/views/profile/edit_profile_screen.dart';
-
 // Settings screens
-import 'views/settings/settings_screen.dart';
-import 'views/settings/language_selection_screen.dart';
+import 'views/settings/settings_screen.dart'; 
 import 'views/settings/business_hours_screen.dart';
 import 'views/settings/privacy_policy_screen.dart';
 import 'views/settings/terms_conditions_screen.dart';
@@ -45,9 +42,7 @@ import 'views/customers/customer_detail_screen.dart';
 import 'views/customers/customer_wishlist_screen.dart';
 
 void main() {
-  // Ensure Flutter framework is initialized
   WidgetsFlutterBinding.ensureInitialized();
-  
   runApp(const MyApp());
 }
 
@@ -67,26 +62,16 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        // Auth Provider for API authentication
         ChangeNotifierProvider(
           create: (context) => AuthProvider()..loadAuthData(),
         ),
-        
-        // Login ViewModel with dependency injection
         ChangeNotifierProvider(
           create: (context) => LoginViewModel(NavigationService()),
         ),
-        
-        // Add more providers as your app grows
-        // ChangeNotifierProvider(
-        //   create: (context) => ProductsProvider(),
-        // ),
-        // ChangeNotifierProvider(
-        //   create: (context) => CustomersProvider(),
-        // ),
-        // ChangeNotifierProvider(
-        //   create: (context) => ProfileProvider(),
-        // ),
+        // **FIXED: Remove 'const' keyword**
+        ChangeNotifierProvider(
+          create: (context) => ProductProvider(),  // <-- REMOVED const
+        ),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -96,8 +81,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             navigatorKey: NavigationService.navigatorKey,
             
-            // Dynamic initial route based on authentication state
-            home: AuthWrapper(),
+            home: const AuthWrapper(),
             
             routes: {
               // Authentication routes
@@ -106,7 +90,7 @@ class MyApp extends StatelessWidget {
               '/forgot-password': (context) => const ForgotPasswordScreen(),
               '/reset-password': (context) => const ResetPasswordScreen(),
               
-              // Main app routes (require authentication)
+              // Main app routes
               '/dashboard': (context) => const AuthenticatedRoute(
                 child: DashboardScreen(),
               ),
@@ -121,52 +105,39 @@ class MyApp extends StatelessWidget {
               '/profile': (context) => const AuthenticatedRoute(
                 child: ProfileScreen(),
               ),
-              '/edit-profile': (context) => const AuthenticatedRoute(
-                child: EditProfileScreen(),
-              ),
               
               // Settings routes
-              '/settings': (context) => AuthenticatedRoute(
+              '/settings': (context) => const AuthenticatedRoute(
                 child: SettingsScreen(),
               ),
-              '/settings/language': (context) => AuthenticatedRoute(
-                child: LanguageSelectionScreen(),
-              ),
-              '/settings/business-hours': (context) => AuthenticatedRoute(
+              '/settings/business-hours': (context) => const AuthenticatedRoute(
                 child: BusinessHoursScreen(),
               ),
-              '/settings/privacy-policy': (context) => AuthenticatedRoute(
+              '/settings/privacy-policy': (context) => const AuthenticatedRoute(
                 child: PrivacyPolicyScreen(),
               ),
-              '/settings/terms-conditions': (context) => AuthenticatedRoute(
+              '/settings/terms-conditions': (context) => const AuthenticatedRoute(
                 child: TermsConditionsScreen(),
               ),
-              '/settings/help-support': (context) => AuthenticatedRoute(
+              '/settings/help-support': (context) => const AuthenticatedRoute(
                 child: HelpSupportScreen(),
               ),
-              '/settings/troubleshooting': (context) => AuthenticatedRoute(
+              '/settings/troubleshooting': (context) => const AuthenticatedRoute(
                 child: TroubleshootingScreen(),
               ),
-              '/settings/contact-us': (context) => AuthenticatedRoute(
+              '/settings/contact-us': (context) => const AuthenticatedRoute(
                 child: ContactUsScreen(),
               ),
-              '/settings/about-app': (context) => AuthenticatedRoute(
+              '/settings/about-app': (context) => const AuthenticatedRoute(
                 child: AboutAppScreen(),
               ),
               
               // Customer routes
-              '/customers': (context) => AuthenticatedRoute(
+              '/customers': (context) => const AuthenticatedRoute(
                 child: CustomersListScreen(),
-              ),
-              '/customers/detail': (context) => AuthenticatedRoute(
-                child: CustomerDetailScreen(customerData: {}),
-              ),
-              '/customers/wishlist': (context) => AuthenticatedRoute(
-                child: CustomerWishlistScreen(customerData: {}),
               ),
             },
             
-            // Handle unknown routes
             onUnknownRoute: (settings) {
               return MaterialPageRoute(
                 builder: (context) => const SplashScreen(),
@@ -179,7 +150,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Auth Wrapper to handle initial routing
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({Key? key}) : super(key: key);
 
@@ -192,7 +162,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     
-    // Load authentication data when app starts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       authProvider.loadAuthData();
@@ -203,12 +172,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Show splash screen while loading
         if (authProvider.isLoading) {
           return const SplashScreen();
         }
         
-        // Navigate based on authentication state
         if (authProvider.isAuthenticated) {
           return const DashboardScreen();
         } else {
@@ -219,7 +186,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 }
 
-// Wrapper for authenticated routes
 class AuthenticatedRoute extends StatelessWidget {
   final Widget child;
   
@@ -233,11 +199,10 @@ class AuthenticatedRoute extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
         if (!authProvider.isAuthenticated) {
-          // Redirect to login if not authenticated
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushReplacementNamed('/login');
           });
-          return const SplashScreen(); // Show loading while redirecting
+          return const SplashScreen();
         }
         
         return child;
@@ -246,7 +211,6 @@ class AuthenticatedRoute extends StatelessWidget {
   }
 }
 
-// Extension for easy navigation with authentication check
 extension NavigationExtension on BuildContext {
   void pushAuthenticatedRoute(String routeName, {Object? arguments}) {
     final authProvider = Provider.of<AuthProvider>(this, listen: false);

@@ -1,4 +1,4 @@
-// File: lib/widgets/dialogs/price_dialog_widget.dart
+// lib/widgets/dialogs/price_dialog_widget.dart
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
 
@@ -22,8 +22,9 @@ class _PriceDialogWidgetState extends State<PriceDialogWidget> {
   @override
   void initState() {
     super.initState();
+    // Fix: Convert double to string properly
     _priceController = TextEditingController(
-      text: widget.product.price.replaceAll('₹', ''),
+      text: widget.product.price.toString(),
     );
   }
 
@@ -37,15 +38,37 @@ class _PriceDialogWidgetState extends State<PriceDialogWidget> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('Update Price'),
-      content: TextField(
-        controller: _priceController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          hintText: 'Enter new price',
-          prefixText: '₹ ',
-          border: OutlineInputBorder(),
+      title: const Text(
+        'Update Price',
+        style: TextStyle(
+          fontFamily: "Poppins",
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF2C3E50),
         ),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Current Price: ${widget.product.priceDisplay}',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontFamily: "Inter",
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _priceController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'New Price',
+              prefixText: '₹',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -61,7 +84,7 @@ class _PriceDialogWidgetState extends State<PriceDialogWidget> {
             backgroundColor: const Color(0xFF4FC3F7),
             foregroundColor: Colors.white,
           ),
-          child: const Text('Update Price'),
+          child: const Text('Update'),
         ),
       ],
     );

@@ -1,319 +1,166 @@
+// lib/widgets/profile/profile_header_widget.dart
 import 'package:flutter/material.dart';
-import '../../viewmodels/profile/profile_viewmodel.dart';
-import '../../resources/styles/text_styles.dart';
-import '../../utils/helpers/image_picker_helper.dart';
+import '../../providers/auth_provider.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
-  final ProfileViewModel viewModel;
+  final AuthProvider authProvider;
 
-  const ProfileHeaderWidget({
-    Key? key,
-    required this.viewModel,
-  }) : super(key: key);
+  const ProfileHeaderWidget({Key? key, required this.authProvider}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Profile Image with camera button
-        Stack(
-          children: [
-            Hero(
-              tag: 'profile_image',
-              child: Container(
-                width: 130,
-                height: 130,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Profile Image
+          Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
+                  shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                     colors: [
+                      const Color(0xFF4FC3F7).withOpacity(0.2),
                       const Color(0xFF4FC3F7).withOpacity(0.1),
-                      const Color(0xFF4FC3F7).withOpacity(0.05),
                     ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF4FC3F7).withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(25),
-                  child: Image.asset(
-                    viewModel.profileImagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF4FC3F7).withOpacity(0.2),
-                              const Color(0xFF4FC3F7).withOpacity(0.1),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(25),
+                child: authProvider.userProfilePicture != null
+                    ? ClipOval(
+                        child: Image.network(
+                          authProvider.userProfilePicture!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildDefaultAvatar();
+                          },
                         ),
-                        child: const Icon(
-                          Icons.person,
-                          size: 65,
-                          color: Color(0xFF4FC3F7),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                      )
+                    : _buildDefaultAvatar(),
               ),
-            ),
-            
-            // Camera button for profile image upload
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () => _showImagePickerOptions(context),
+              Positioned(
+                bottom: 0,
+                right: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF4FC3F7),
-                        Color(0xFF29B6F6),
-                      ],
-                    ),
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4FC3F7),
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF4FC3F7).withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: const Icon(
                     Icons.camera_alt,
                     color: Colors.white,
-                    size: 18,
+                    size: 16,
                   ),
                 ),
               ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // User Role Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4FC3F7).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-        ),
-        
-        const SizedBox(height: 24),
-        
-        // User Role Badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                const Color(0xFF4FC3F7).withOpacity(0.15),
-                const Color(0xFF4FC3F7).withOpacity(0.1),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(0xFF4FC3F7).withOpacity(0.3),
-              width: 1,
+            child: Text(
+              _getUserRole(),
+              style: const TextStyle(
+                color: Color(0xFF4FC3F7),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                fontFamily: "Inter",
+              ),
             ),
           ),
-          child: Text(
-            viewModel.userRole,
-            style: AppTextStyles.labelMedium.copyWith(
-              color: const Color(0xFF4FC3F7),
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+          
+          const SizedBox(height: 12),
+          
+          // User Name
+          Text(
+            authProvider.userName,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2C3E50),
+              fontFamily: "Poppins",
             ),
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // User Name with animation
-        AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 300),
-          style: AppTextStyles.heading2.copyWith(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-          ),
-          child: Text(
-            viewModel.userName,
             textAlign: TextAlign.center,
           ),
-        ),
-      ],
-    );
-  }
-
-  void _showImagePickerOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
+          
+          const SizedBox(height: 6),
+          
+          // User Email
+          Text(
+            authProvider.userEmail,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+              fontFamily: "Inter",
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-            
+          
+          const SizedBox(height: 4),
+          
+          // User Phone
+          if (authProvider.userPhone.isNotEmpty)
             Text(
-              'Change Profile Picture',
-              style: AppTextStyles.heading3.copyWith(fontSize: 18),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Camera option
-                _imagePickerOption(
-                  context,
-                  Icons.camera_alt,
-                  'Camera',
-                  () => _pickImage(context, true),
-                ),
-                
-                // Gallery option
-                _imagePickerOption(
-                  context,
-                  Icons.photo_library,
-                  'Gallery',
-                  () => _pickImage(context, false),
-                ),
-                
-                // Remove option
-                _imagePickerOption(
-                  context,
-                  Icons.delete_outline,
-                  'Remove',
-                  () => _removeImage(context),
-                  isDestructive: true,
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _imagePickerOption(
-    BuildContext context,
-    IconData icon,
-    String label,
-    VoidCallback onTap, {
-    bool isDestructive = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDestructive 
-              ? Colors.red.withOpacity(0.1) 
-              : const Color(0xFF4FC3F7).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDestructive 
-                ? Colors.red.withOpacity(0.3) 
-                : const Color(0xFF4FC3F7).withOpacity(0.3),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isDestructive ? Colors.red : const Color(0xFF4FC3F7),
-              size: 28,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: AppTextStyles.labelMedium.copyWith(
-                color: isDestructive ? Colors.red : const Color(0xFF4FC3F7),
-                fontSize: 12,
+              authProvider.userPhone,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+                fontFamily: "Inter",
               ),
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  void _pickImage(BuildContext context, bool fromCamera) async {
-    Navigator.pop(context);
-    
-    // For now, just show a message since actual implementation would require image_picker
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          fromCamera 
-              ? 'Camera functionality will be implemented' 
-              : 'Gallery functionality will be implemented'
-        ),
-        backgroundColor: const Color(0xFF4FC3F7),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+  Widget _buildDefaultAvatar() {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFF4FC3F7).withOpacity(0.1),
+      ),
+      child: Icon(
+        Icons.person,
+        size: 60,
+        color: const Color(0xFF4FC3F7),
       ),
     );
-    
-    // TODO: Implement actual image picking logic
-    // final picker = ImagePicker();
-    // final image = await picker.pickImage(
-    //   source: fromCamera ? ImageSource.camera : ImageSource.gallery,
-    // );
-    // if (image != null) {
-    //   viewModel.updateProfileImage(image.path);
-    // }
   }
 
-  void _removeImage(BuildContext context) {
-    Navigator.pop(context);
-    
-    // Reset to default profile image
-    viewModel.updateProfileImage('assets/images/profile.png');
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Profile picture removed'),
-        backgroundColor: const Color(0xFF4FC3F7),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
+  String _getUserRole() {
+    if (authProvider.isBusinessPartner) {
+      return 'Business Partner';
+    } else if (authProvider.isAdmin) {
+      return 'Administrator';
+    } else if (authProvider.isEndUser) {
+      return 'End User';
+    } else {
+      return 'User';
+    }
   }
 }

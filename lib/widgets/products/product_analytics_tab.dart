@@ -1,6 +1,5 @@
-// File: lib/widgets/products/product_analytics_tab.dart
+// lib/widgets/products/product_analytics_tab.dart
 import 'package:flutter/material.dart';
-import '../common/analytics_card_widget.dart';
 
 class ProductAnalyticsTab extends StatelessWidget {
   final Map<String, dynamic> productMetrics;
@@ -13,70 +12,203 @@ class ProductAnalyticsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Analytics Overview',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2C3E50),
+                fontFamily: "Poppins",
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Analytics Cards
+            Row(
+              children: [
+                Expanded(
+                  child: _buildAnalyticsCard(
+                    'Total Views',
+                    '${productMetrics['views']}',
+                    '+12% from last week',
+                    Icons.visibility,
+                    Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildAnalyticsCard(
+                    'Conversion Rate',
+                    '${productMetrics['conversionRate']}%',
+                    '+2.3% improvement',
+                    Icons.trending_up,
+                    Colors.green,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 12),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: _buildAnalyticsCard(
+                    'Total Revenue',
+                    '₹${productMetrics['revenue']}',
+                    '+25% this month',
+                    Icons.attach_money,
+                    Colors.orange,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildAnalyticsCard(
+                    'Units Sold',
+                    '${productMetrics['totalSales']}',
+                    'Best seller this week',
+                    Icons.shopping_cart,
+                    Colors.purple,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Performance Chart Placeholder
+            Container(
+              height: 200,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF4FC3F7).withOpacity(0.1),
+                    Colors.purple.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Sales Performance',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.bar_chart,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Sales Chart',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                              fontFamily: "Inter",
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'Interactive chart coming soon',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                              fontFamily: "Inter",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsCard(String title, String value, String subtitle, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sales Analytics',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2C3E50),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: const Center(
-              child: Text(
-                'Sales Chart\n(Integration ready)',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(
-                child: AnalyticsCardWidget(
-                  title: 'Weekly Sales',
-                  value: '45',
-                  change: '+12%',
-                  color: Colors.green,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AnalyticsCardWidget(
-                  title: 'Monthly Revenue',
-                  value: '₹1,350',
-                  change: '+8%',
-                  color: Colors.blue,
+              Icon(icon, color: color, size: 20),
+              const Spacer(),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontFamily: "Poppins",
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontFamily: "Inter",
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 10,
+              color: color.withOpacity(0.7),
+              fontFamily: "Inter",
+            ),
           ),
         ],
       ),

@@ -1,4 +1,4 @@
-// File: lib/widgets/products/product_overview_section.dart
+// lib/widgets/products/product_overview_section.dart
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
 
@@ -15,13 +15,18 @@ class ProductOverviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,88 +35,133 @@ class ProductOverviewSection extends StatelessWidget {
           Row(
             children: [
               Expanded(
+                child: Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2C3E50),
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4FC3F7).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  product.category,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF4FC3F7),
+                    fontFamily: "Inter",
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Product Code
+          if (product.productCode != null)
+            Text(
+              'SKU: ${product.productCode}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontFamily: "Inter",
+              ),
+            ),
+          
+          const SizedBox(height: 16),
+          
+          // Description
+          Text(
+            product.description,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[700],
+              fontFamily: "Inter",
+              height: 1.5,
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Price and Stock Row
+          Row(
+            children: [
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
+                    const Text(
+                      'Price',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontFamily: "Inter",
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      product.category.isEmpty ? 'Fruits' : product.category,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                      product.priceDisplay,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4FC3F7),
+                        fontFamily: "Poppins",
                       ),
                     ),
                   ],
                 ),
               ),
-              Text(
-                product.price,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4FC3F7),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: product.inStock ? Colors.green[50] : Colors.red[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: product.inStock ? Colors.green[200]! : Colors.red[200]!,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      product.inStock ? Icons.check_circle : Icons.cancel,
+                      color: product.inStock ? Colors.green[600] : Colors.red[600],
+                      size: 24,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${product.quantity}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: product.inStock ? Colors.green[700] : Colors.red[700],
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                    Text(
+                      'in stock',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: product.inStock ? Colors.green[600] : Colors.red[600],
+                        fontFamily: "Inter",
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Quick Stats Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildQuickStat('Sales', '${productMetrics['totalSales']}', Icons.shopping_cart),
-              _buildQuickStat('Revenue', '₹${productMetrics['revenue']}', Icons.attach_money),
-              _buildQuickStat('Views', '${productMetrics['views']}', Icons.visibility),
-            ],
-          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuickStat(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF4FC3F7).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: const Color(0xFF4FC3F7), size: 24),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,7 +1,7 @@
-// lib/views/dashboard/dashboard_screen.dart
+// lib/views/dashboard/dashboard_screen.dart - ENHANCED VERSION
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart'; // Add this import
+import '../../providers/auth_provider.dart';
 import '../../widgets/cards/dashboard_stats_card.dart';
 import '../../widgets/charts/stock_line_chart.dart';
 import '../../widgets/cards/dashboard_extra_card.dart';
@@ -22,7 +22,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Get user data from AuthProvider
         final userName = authProvider.userName;
         final userProfilePicture = authProvider.userProfilePicture;
         
@@ -73,24 +72,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // HEADER: Profile, Title, Notification
+                // ENHANCED HEADER with better profile image handling
                 Container(
                   height: 65,
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Row(
                     children: [
-                      // Profile icon with real user image
+                      // **ENHANCED PROFILE IMAGE WIDGET**
                       GestureDetector(
                         onTap: () => Navigator.pushNamed(context, '/profile'),
-                        child: CircleAvatar(
-                          radius: 22,
-                          backgroundImage: userProfilePicture != null
-                              ? NetworkImage(userProfilePicture)
-                              : const AssetImage('assets/images/profile.png') as ImageProvider,
-                          backgroundColor: Colors.grey[300],
-                          child: userProfilePicture == null
-                              ? Icon(Icons.person, color: Colors.grey[600], size: 24)
-                              : null,
+                        child: _buildProfileAvatar(
+                          authProvider: authProvider,
+                          size: 44, // diameter = radius * 2
                         ),
                       ),
                       const Spacer(),
@@ -125,20 +118,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         const SizedBox(height: 10),
                         
-                        // Greeting with real user name
-                        Text(
-                          'Hello, ${authProvider.userFirstName}!',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                            color: const Color(0xFF2C3E50),
-                          ),
+                        // **ENHANCED GREETING with profile image**
+                        Row(
+                          children: [
+                            
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Hello, ${authProvider.userFirstName}!',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24,
+                                      color: const Color(0xFF2C3E50),
+                                    ),
+                                  ),
+                                  Text(
+                                    'Welcome back to your dashboard',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 24),
                         
-                        // Rest of your existing dashboard content...
+                        // Stats cards
                         Wrap(
                           runSpacing: 18,
                           spacing: 14,
@@ -153,7 +167,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         
                         const SizedBox(height: 32),
                         
-                        // Revenue chart section (keep existing code)
+                        // Revenue chart section
                         Card(
                           margin: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
@@ -227,7 +241,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           
-          // Keep existing bottom navigation
           bottomNavigationBar: Container(
             height: 65,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -257,6 +270,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // **ENHANCED PROFILE AVATAR WIDGET**
+  Widget _buildProfileAvatar({
+    required AuthProvider authProvider,
+    required double size,
+    bool showBorder = false,
+  }) {
+    final userProfilePicture = authProvider.userProfilePicture;
+    final userName = authProvider.userName;
+    final userEmail = authProvider.userEmail;
+    
+    // Get initials from name or email
+    String getInitials() {
+      if (userName.isNotEmpty && userName != 'User') {
+        final parts = userName.trim().split(' ');
+        if (parts.length >= 2) {
+          return '${parts[0][0].toUpperCase()}${parts[1][0].toUpperCase()}';
+        } else {
+          return parts[0][0].toUpperCase();
+        }
+      } else if (userEmail.isNotEmpty) {
+        return userEmail[0].toUpperCase();
+      }
+      return 'U';
+    }
+
+    // Generate consistent color based on user name/email
+    Color getAvatarColor() {
+      final String seed = userName.isNotEmpty ? userName : userEmail;
+      final int hash = seed.hashCode;
+      final List<Color> colors = [
+        const Color(0xFF4FC3F7), // Primary blue
+        const Color(0xFF66BB6A), // Green
+        const Color(0xFFFF7043), // Orange
+        const Color(0xFFAB47BC), // Purple
+        const Color(0xFF42A5F5), // Light blue
+        const Color(0xFFEF5350), // Red
+        const Color(0xFFFFCA28), // Amber
+        const Color(0xFF26A69A), // Teal
+      ];
+      return colors[hash.abs() % colors.length];
+    }
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: showBorder
+          ? BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF4FC3F7),
+                width: 2,
+              ),
+            )
+          : null,
+      child: CircleAvatar(
+        radius: size / 2,
+        backgroundColor: getAvatarColor(),
+        backgroundImage: (userProfilePicture != null && 
+                         userProfilePicture.isNotEmpty && 
+                         userProfilePicture != 'null')
+            ? NetworkImage(userProfilePicture)
+            : null,
+        onBackgroundImageError: (userProfilePicture != null && 
+                                 userProfilePicture.isNotEmpty && 
+                                 userProfilePicture != 'null')
+            ? (exception, stackTrace) {
+                print('❌ Profile image load error: $exception');
+              }
+            : null,
+        child: (userProfilePicture == null || 
+                userProfilePicture.isEmpty || 
+                userProfilePicture == 'null')
+            ? Text(
+                getInitials(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: size / 2.5,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+
   Widget _navButton(IconData icon, String label, {bool selected = false}) {
     return GestureDetector(
       onTap: () {
@@ -269,12 +368,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.pushReplacementNamed(context, '/products');
               break;
             case "Bookings":
-              Navigator.pushReplacementNamed(context, '/bookings');
+              Navigator.pushNamed(context, '/bookings');
               break;
             case "Profile":
               Navigator.pushNamed(context, '/profile');
-              break;
-            case "Dashboard":
               break;
           }
         }

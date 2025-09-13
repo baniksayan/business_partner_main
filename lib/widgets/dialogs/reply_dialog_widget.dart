@@ -1,4 +1,4 @@
-// File: lib/widgets/dialogs/reply_dialog_widget.dart
+// lib/widgets/dialogs/reply_dialog_widget.dart
 import 'package:flutter/material.dart';
 
 class ReplyDialogWidget extends StatefulWidget {
@@ -28,13 +28,21 @@ class _ReplyDialogWidgetState extends State<ReplyDialogWidget> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text('Reply to ${widget.customerName}'),
+      title: Text(
+        'Reply to ${widget.customerName}',
+        style: const TextStyle(
+          fontFamily: "Poppins",
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF2C3E50),
+        ),
+      ),
       content: TextField(
         controller: _replyController,
-        maxLines: 3,
+        maxLines: 4,
         decoration: const InputDecoration(
-          hintText: 'Type your reply...',
+          labelText: 'Your Reply',
           border: OutlineInputBorder(),
+          alignLabelWithHint: true,
         ),
       ),
       actions: [

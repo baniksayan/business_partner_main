@@ -1,4 +1,4 @@
-// File: lib/views/products/product_details_screen.dart
+// lib/views/products/product_details_screen.dart
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
 import '../../widgets/products/product_details_app_bar.dart';
@@ -13,7 +13,7 @@ import '../../widgets/products/product_options_bottom_sheet.dart';
 import '../../widgets/dialogs/reply_dialog_widget.dart';
 import '../../widgets/dialogs/stock_dialog_widget.dart';
 import '../../widgets/dialogs/price_dialog_widget.dart';
-// import '../../widgets/dialogs/confirmation_dialog.dart';
+import 'edit_product_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
@@ -205,15 +205,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
 
   // Business Owner Actions
   void _editProduct() {
-    Navigator.pushNamed(context, '/edit-product', arguments: widget.product);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProductScreen(product: widget.product),
+      ),
+    ).then((result) {
+      if (result == true) {
+        Navigator.pop(context, true); // Return with refresh signal
+      }
+    });
   }
 
   void _shareProduct() {
-    // Implement product sharing
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Product link copied to clipboard!'),
         backgroundColor: Color(0xFF4FC3F7),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
       ),
     );
   }
@@ -225,20 +237,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
       builder: (context) => ProductOptionsBottomSheet(
         onEdit: _editProduct,
         onDuplicate: () {
-          // Implement duplicate
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Product duplicated successfully!'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ),
           );
         },
         onArchive: () {
-          // Implement archive
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Product archived successfully!'),
               backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ),
           );
         },
@@ -257,6 +275,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             const SnackBar(
               content: Text('Reply sent successfully!'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ),
           );
         },
@@ -273,6 +295,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             const SnackBar(
               content: Text('Stock updated successfully!'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ),
           );
         },
@@ -290,6 +316,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             const SnackBar(
               content: Text('Price updated successfully!'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ),
           );
         },
@@ -312,11 +342,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.pop(context); // Go back to products list
+              Navigator.pop(context, true); // Go back with refresh signal
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Product deleted successfully!'),
                   backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
               );
             },
