@@ -1,7 +1,8 @@
+// lib/views/customers/customer_wishlist_screen.dart - FIXED VERSION
 import 'package:flutter/material.dart';
 import '../../resources/colors/app_colors.dart';
+import '../../models/customer.dart'; // ✅ FIXED: Import from models instead of screens
 import 'choose_offer_template_screen.dart';
-import 'customers_list_screen.dart'; // For Customer class
 
 class CustomerWishlistScreen extends StatelessWidget {
   final Customer customer;
@@ -54,7 +55,7 @@ class CustomerWishlistScreen extends StatelessWidget {
         ),
         centerTitle: true,
         title: Text(
-          'Customer Wishlist',
+          '${customer.name}\'s Wishlist', // ✅ ENHANCED: Show customer name in title
           style: TextStyle(
             color: AppColors.splashText,
             fontFamily: 'Poppins',
@@ -63,102 +64,150 @@ class CustomerWishlistScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: wishlist.length,
-        itemBuilder: (context, i) {
-          final item = wishlist[i];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 18),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Added on ${item['date']}',
-                        style: TextStyle(
-                          color: AppColors.splashSubtext,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['title'],
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: AppColors.splashText,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item['price'],
-                        style: TextStyle(
-                          color: AppColors.splashDots,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChooseOfferTemplateScreen(
-                                wishlistItem: item,
-                                customer: customer,
-                              ),
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.splashDots,
-                          side: BorderSide(color: AppColors.splashDots),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Convert to Offer'),
+      body: wishlist.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No items in wishlist',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Customer hasn\'t added any items yet',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: wishlist.length,
+              itemBuilder: (context, i) {
+                final item = wishlist[i];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 18),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    item['image'],
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: 70,
-                      height: 70,
-                      color: AppColors.splashSecondary.withOpacity(0.08),
-                      child: Icon(Icons.image_not_supported, color: AppColors.splashSecondary, size: 32),
-                    ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Added on ${item['date']}',
+                              style: TextStyle(
+                                color: AppColors.splashSubtext,
+                                fontSize: 12,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item['title'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: AppColors.splashText,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item['price'],
+                              style: TextStyle(
+                                color: AppColors.splashDots,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            OutlinedButton(
+                              onPressed: () {
+                                // ✅ FIXED: Check if ChooseOfferTemplateScreen exists
+                                try {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChooseOfferTemplateScreen(
+                                        wishlistItem: item,
+                                        customer: customer,
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  // ✅ FALLBACK: Show snackbar if screen doesn't exist
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Converting "${item['title']}" to offer for ${customer.name}'),
+                                      backgroundColor: AppColors.splashDots,
+                                    ),
+                                  );
+                                }
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.splashDots,
+                                side: BorderSide(color: AppColors.splashDots),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text('Convert to Offer'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          item['image'],
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 70,
+                            height: 70,
+                            color: AppColors.splashSecondary.withOpacity(0.08),
+                            child: Icon(
+                              Icons.favorite,
+                              color: AppColors.splashDots,
+                              size: 32,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

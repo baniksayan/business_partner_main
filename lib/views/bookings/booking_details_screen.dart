@@ -1,3 +1,4 @@
+// lib/views/bookings/booking_details_screen.dart - FIXED CONSTRUCTOR
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../resources/colors/app_colors.dart';
@@ -24,7 +25,6 @@ class BookingDetailsScreen extends StatelessWidget {
       }
     } catch (e) {
       print('Error launching phone call: $e');
-      // You can show a snackbar or dialog here for error handling
     }
   }
 
@@ -42,8 +42,30 @@ class BookingDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get phone number from booking data, with fallback
-    String customerPhone = booking['phone'] ?? '+919876543210';
+    // ✅ FIXED: Handle different data formats
+    final customerName = booking['customer_name'] ?? 
+                       booking['customer'] ?? 
+                       booking['customerName'] ?? 
+                       'Unknown Customer';
+                       
+    final customerPhone = booking['customer_phone'] ?? 
+                         booking['phone'] ?? 
+                         booking['customerPhone'] ?? 
+                         '+919876543210';
+                         
+    final serviceName = booking['service_name'] ?? 
+                       booking['serviceName'] ?? 
+                       'Service';
+                       
+    final serviceProvider = booking['service_provider_name'] ?? 
+                           booking['serviceProviderName'] ?? 
+                           'Service Provider';
+                           
+    final bookingStatus = booking['status'] ?? 'Pending';
+    final bookingAmount = booking['amount']?.toDouble() ?? 0.0;
+    final isPaid = booking['is_paid'] ?? booking['paid'] ?? false;
+    final bookingId = booking['id']?.toString() ?? '12345';
+    
     String displayPhone = _formatPhoneNumber(customerPhone);
 
     return Scaffold(
@@ -82,7 +104,7 @@ class BookingDetailsScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Booking ID: #${booking['id'] ?? '12345'}',
+                    'Booking ID: #$bookingId',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -90,13 +112,13 @@ class BookingDetailsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _statusBgColor(booking['status']),
+                      color: _statusBgColor(bookingStatus),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      booking['status'],
+                      bookingStatus,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: _statusColor(booking['status']),
+                        color: _statusColor(bookingStatus),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -130,7 +152,7 @@ class BookingDetailsScreen extends StatelessWidget {
                         backgroundColor: AppColors.splashDots,
                         radius: 30,
                         child: Text(
-                          booking['customer'][0],
+                          customerName.isNotEmpty ? customerName[0] : 'C',
                           style: AppTextStyles.heading3.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -143,7 +165,7 @@ class BookingDetailsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              booking['customer'],
+                              customerName,
                               style: AppTextStyles.labelLarge.copyWith(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 18,
@@ -236,7 +258,7 @@ class BookingDetailsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${booking['date']} • ${booking['time']}',
+                            '${booking['date'] ?? 'N/A'} • ${booking['time'] ?? 'N/A'}',
                             style: AppTextStyles.bodyLarge.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -257,7 +279,7 @@ class BookingDetailsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        "Men's Haircut",
+                        serviceName,
                         style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -273,14 +295,14 @@ class BookingDetailsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Stylist',
+                            'Service Provider',
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: Colors.grey[600],
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Ramesh Kumar',
+                            serviceProvider,
                             style: AppTextStyles.bodyLarge.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -331,15 +353,15 @@ class BookingDetailsScreen extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            booking['paid'] ? Icons.check_circle : Icons.cancel,
-                            color: booking['paid'] ? Colors.green : Colors.red,
+                            isPaid ? Icons.check_circle : Icons.cancel,
+                            color: isPaid ? Colors.green : Colors.red,
                             size: 18,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            booking['paid'] ? 'Paid' : 'Unpaid',
+                            isPaid ? 'Paid' : 'Unpaid',
                             style: AppTextStyles.bodyLarge.copyWith(
-                              color: booking['paid'] ? Colors.green : Colors.red,
+                              color: isPaid ? Colors.green : Colors.red,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -356,7 +378,7 @@ class BookingDetailsScreen extends StatelessWidget {
                         style: AppTextStyles.bodyLarge,
                       ),
                       Text(
-                        '₹${booking['amount'] > 200 ? booking['amount'] - 200 : booking['amount']}',
+                        '₹${bookingAmount > 200 ? (bookingAmount - 200).toStringAsFixed(0) : bookingAmount.toStringAsFixed(0)}',
                         style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -372,7 +394,7 @@ class BookingDetailsScreen extends StatelessWidget {
                         style: AppTextStyles.bodyLarge,
                       ),
                       Text(
-                        '₹${booking['amount'] > 200 ? 200 : 0}',
+                        '₹${bookingAmount > 200 ? 200 : 0}',
                         style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -395,7 +417,7 @@ class BookingDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '₹${booking['amount']}',
+                        '₹${bookingAmount.toStringAsFixed(0)}',
                         style: AppTextStyles.labelLarge.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: 18,

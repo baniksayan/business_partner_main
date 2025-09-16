@@ -1,7 +1,12 @@
+// lib/views/bookings/bookings_screen.dart - FIXED VERSION
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../resources/colors/app_colors.dart';
 import '../../resources/styles/text_styles.dart';
-import 'booking_details_screen.dart'; // Add this import
+import '../../providers/booking_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../models/booking.dart';
+import 'booking_details_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   @override
@@ -9,54 +14,38 @@ class BookingsScreen extends StatefulWidget {
 }
 
 class _BookingsScreenState extends State<BookingsScreen> {
-  final List<Map<String, dynamic>> bookings = [
-    {
-      'customer': 'Rahul Singh',
-      'phone': '+919876543210', // Add phone numbers
-      'date': '9 Sep, 2025',
-      'time': '11:00 AM',
-      'status': 'Cancelled',
-      'paid': false,
-      'amount': 0,
-    },
-    {
-      'customer': 'Amit Sharma',
-      'phone': '+919876543211', // Add phone numbers
-      'date': '11 Sep, 2025',
-      'time': '2:00 PM',
-      'status': 'Confirmed',
-      'paid': true,
-      'amount': 1200,
-    },
-    {
-      'customer': 'Neha Verma',
-      'phone': '+919876543212', // Add phone numbers
-      'date': '10 Sep, 2025',
-      'time': '5:30 PM',
-      'status': 'Pending',
-      'paid': false,
-      'amount': 800,
-    },
-  ];
-
   String searchText = '';
   String sortBy = 'Newest';
-  String? filterStatus; // Add this to your _BookingsScreenState
+  String? filterStatus;
 
-  List<Map<String, dynamic>> get filteredBookings {
-    List<Map<String, dynamic>> filtered = bookings
-        .where((b) =>
-            b['customer'].toLowerCase().contains(searchText.toLowerCase()))
-        .toList();
-    if (filterStatus != null) {
-      filtered = filtered.where((b) => b['status'] == filterStatus).toList();
-    }
-    if (sortBy == 'Amount') {
-      filtered.sort((a, b) => b['amount'].compareTo(a['amount']));
-    } else {
-      filtered.sort((a, b) => b['date'].compareTo(a['date']));
-    }
-    return filtered;
+  @override
+  void initState() {
+    super.initState();
+    print('📅 [BookingsScreen] Initializing...');
+    
+    // Load bookings when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadBookings();
+    });
+  }
+
+  Future<void> _loadBookings() async {
+    print('📅 [BookingsScreen] Loading bookings...');
+    final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+    await bookingProvider.getAllBookings(context);
+  }
+
+  Future<void> _refreshBookings() async {
+    print('🔄 [BookingsScreen] Refreshing bookings...');
+    await _loadBookings();
+  }
+
+  List<Booking> get filteredBookings {
+    final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+    return bookingProvider.getFilteredBookings(
+      status: filterStatus,
+      searchQuery: searchText,
+    );
   }
 
   Color _statusColor(String status) {
@@ -64,7 +53,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
       case 'Confirmed':
         return Colors.green;
       case 'Pending':
-        return Color(0xFFFBC02D); // Amber for pending
+        return Color(0xFFFBC02D);
       case 'Cancelled':
         return Colors.red;
       default:
@@ -110,268 +99,393 @@ class _BookingsScreenState extends State<BookingsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: Text('Bookings', style: AppTextStyles.heading3), // Reduced size
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-            child: Row(
-              children: [
-                // Search Bar
-                Expanded(
-                  child: Container(
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: TextField(
-                      onChanged: (val) => setState(() => searchText = val),
-                      decoration: InputDecoration(
-                        hintText: 'Search by name or service',
-                        hintStyle: AppTextStyles.bodyMedium,
-                        border: InputBorder.none,
-                        prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                // Filter Button (dummy for now)
-                IconButton(
-                  icon: Icon(Icons.tune, color: AppColors.splashText),
-                  tooltip: 'Filter',
-                  onPressed: () async {
-                    final selected = await showModalBottomSheet<String>(
-                      context: context,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-                      ),
-                      builder: (context) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ListTile(
-                              title: Text('All'),
-                              onTap: () => Navigator.pop(context, null),
-                              selected: filterStatus == null,
-                            ),
-                            ListTile(
-                              title: Text('Confirmed'),
-                              onTap: () => Navigator.pop(context, 'Confirmed'),
-                              selected: filterStatus == 'Confirmed',
-                            ),
-                            ListTile(
-                              title: Text('Pending'),
-                              onTap: () => Navigator.pop(context, 'Pending'),
-                              selected: filterStatus == 'Pending',
-                            ),
-                            ListTile(
-                              title: Text('Cancelled'),
-                              onTap: () => Navigator.pop(context, 'Cancelled'),
-                              selected: filterStatus == 'Cancelled',
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                    if (selected != null || filterStatus != selected) {
-                      setState(() {
-                        filterStatus = selected;
-                      });
-                    }
-                  },
-                ),
-                // Sort Button
-                PopupMenuButton<String>(
-                  onSelected: (val) => setState(() => sortBy = val),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(value: 'Newest', child: Text('Sort by Newest')),
-                    PopupMenuItem(value: 'Amount', child: Text('Sort by Amount')),
-                  ],
-                  icon: Icon(Icons.swap_vert, color: AppColors.splashText),
-                  tooltip: 'Sort',
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: filteredBookings.isEmpty
-                ? Center(
-                    child: Text(
-                      'No bookings found.',
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
-                    itemCount: filteredBookings.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final booking = filteredBookings[index];
-                      return Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BookingDetailsScreen(
-                                  booking: {
-                                    ...booking,
-                                    'id': '1234${index + 1}', // Generate booking ID
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: AppColors.splashDots,
-                                    radius: 24,
-                                    child: Text(
-                                      booking['customer'][0],
-                                      style: AppTextStyles.labelLarge.copyWith(color: Colors.white),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          booking['customer'],
-                                          style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${booking['date']} • ${booking['time']}',
-                                          style: AppTextStyles.bodyMedium,
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          children: [
-                                            // Paid/Unpaid Chip
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: _paidBgColor(booking['paid']),
-                                                borderRadius: BorderRadius.circular(7),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    booking['paid'] ? Icons.check_circle : Icons.cancel,
-                                                    color: _paidColor(booking['paid']),
-                                                    size: 16,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    booking['paid'] ? 'Paid' : 'Unpaid',
-                                                    style: AppTextStyles.bodyMedium.copyWith(
-                                                      color: _paidColor(booking['paid']),
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            // Status Chip
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: _statusBgColor(booking['status']),
-                                                borderRadius: BorderRadius.circular(7),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    _statusIcon(booking['status']),
-                                                    color: _statusColor(booking['status']),
-                                                    size: 16,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    booking['status'],
-                                                    style: AppTextStyles.bodyMedium.copyWith(
-                                                      color: _statusColor(booking['status']),
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    '₹${booking['amount']}',
-                                    style: AppTextStyles.labelLarge.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.splashText,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      );
-                  },
-                ),
+        title: Text('Bookings', style: AppTextStyles.heading3),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh, color: AppColors.splashText),
+            onPressed: _refreshBookings,
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        height: 65,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
+      body: Consumer<BookingProvider>(
+        builder: (context, bookingProvider, child) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
+                child: Row(
+                  children: [
+                    // Search Bar
+                    Expanded(
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: TextField(
+                          onChanged: (val) => setState(() => searchText = val),
+                          decoration: InputDecoration(
+                            hintText: 'Search by name or service',
+                            hintStyle: AppTextStyles.bodyMedium,
+                            border: InputBorder.none,
+                            prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Filter Button
+                    IconButton(
+                      icon: Icon(Icons.tune, color: AppColors.splashText),
+                      tooltip: 'Filter',
+                      onPressed: () async {
+                        final selected = await showModalBottomSheet<String>(
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                          ),
+                          builder: (context) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  title: Text('All'),
+                                  onTap: () => Navigator.pop(context, null),
+                                  selected: filterStatus == null,
+                                ),
+                                ListTile(
+                                  title: Text('Confirmed'),
+                                  onTap: () => Navigator.pop(context, 'Confirmed'),
+                                  selected: filterStatus == 'Confirmed',
+                                ),
+                                ListTile(
+                                  title: Text('Pending'),
+                                  onTap: () => Navigator.pop(context, 'Pending'),
+                                  selected: filterStatus == 'Pending',
+                                ),
+                                ListTile(
+                                  title: Text('Cancelled'),
+                                  onTap: () => Navigator.pop(context, 'Cancelled'),
+                                  selected: filterStatus == 'Cancelled',
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        if (selected != filterStatus) {
+                          setState(() {
+                            filterStatus = selected;
+                          });
+                        }
+                      },
+                    ),
+                    // Sort Button
+                    PopupMenuButton<String>(
+                      onSelected: (val) {
+                        setState(() => sortBy = val);
+                        bookingProvider.sortBookings(val);
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(value: 'Newest', child: Text('Sort by Newest')),
+                        PopupMenuItem(value: 'Amount', child: Text('Sort by Amount')),
+                      ],
+                      icon: Icon(Icons.swap_vert, color: AppColors.splashText),
+                      tooltip: 'Sort',
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: _buildBookingsList(bookingProvider),
+              ),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: _buildBottomNavigation(),
+    );
+  }
+
+  Widget _buildBookingsList(BookingProvider bookingProvider) {
+    if (bookingProvider.isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.splashDots),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Loading bookings...',
+              style: AppTextStyles.bodyMedium,
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      );
+    }
+
+    if (bookingProvider.errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _navButton(Icons.dashboard, "Dashboard"),
-            _navButton(Icons.shopping_bag_outlined, "Products"),
-            _navButton(Icons.book_online_outlined, "Bookings", selected: true),
-            _navButton(Icons.person_outline, "Profile"),
+            Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              bookingProvider.errorMessage!,
+              style: AppTextStyles.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshBookings,
+              child: Text('Retry'),
+            ),
           ],
         ),
+      );
+    }
+
+    final bookings = filteredBookings;
+
+    if (bookings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No bookings found.',
+              style: AppTextStyles.bodyLarge,
+            ),
+            if (filterStatus != null || searchText.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    filterStatus = null;
+                    searchText = '';
+                  });
+                },
+                child: Text('Clear filters'),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshBookings,
+      color: AppColors.splashDots,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+        itemCount: bookings.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final booking = bookings[index];
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () {
+                print('📅 [BookingsScreen] Tapping booking: ${booking.id}');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookingDetailsScreen(
+                      booking: {
+                        // ✅ FIXED: Ensure all required fields are present
+                        'id': booking.id,
+                        'customer': booking.customerName,         // ✅ This is what was missing!
+                        'customer_name': booking.customerName,
+                        'phone': booking.customerPhone,
+                        'customer_phone': booking.customerPhone,
+                        'date': booking.date,
+                        'time': booking.time,
+                        'status': booking.status,
+                        'paid': booking.isPaid,
+                        'is_paid': booking.isPaid,
+                        'amount': booking.amount,
+                        'service_name': booking.serviceName,
+                        'service_provider_name': booking.serviceProviderName,
+                      },
+                    ),
+                  ),
+                );
+              },
+              // ✅ FIXED: Complete booking card UI (this was missing!)
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Customer Avatar
+                      CircleAvatar(
+                        backgroundColor: AppColors.splashDots,
+                        radius: 24,
+                        child: Text(
+                          booking.customerName.isNotEmpty ? booking.customerName[0] : 'C',
+                          style: AppTextStyles.labelLarge.copyWith(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      
+                      // Booking Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Customer Name
+                            Text(
+                              booking.customerName,
+                              style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 2),
+                            
+                            // Date & Time
+                            Text(
+                              '${booking.date} • ${booking.time}',
+                              style: AppTextStyles.bodyMedium,
+                            ),
+                            const SizedBox(height: 2),
+                            
+                            // Service Name
+                            Text(
+                              booking.serviceName,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            
+                            // Status Chips
+                            Row(
+                              children: [
+                                // Paid/Unpaid Chip
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: _paidBgColor(booking.isPaid),
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        booking.isPaid ? Icons.check_circle : Icons.cancel,
+                                        color: _paidColor(booking.isPaid),
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        booking.isPaid ? 'Paid' : 'Unpaid',
+                                        style: AppTextStyles.bodyMedium.copyWith(
+                                          color: _paidColor(booking.isPaid),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                
+                                // Status Chip
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: _statusBgColor(booking.status),
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _statusIcon(booking.status),
+                                        color: _statusColor(booking.status),
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        booking.status,
+                                        style: AppTextStyles.bodyMedium.copyWith(
+                                          color: _statusColor(booking.status),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      
+                      // Amount
+                      Text(
+                        '₹${booking.amount.toStringAsFixed(0)}',
+                        style: AppTextStyles.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.splashText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigation() {
+    return Container(
+      height: 65,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _navButton(Icons.dashboard, "Dashboard"),
+          _navButton(Icons.shopping_bag_outlined, "Products"),
+          _navButton(Icons.book_online_outlined, "Bookings", selected: true),
+          _navButton(Icons.person_outline, "Profile"),
+        ],
       ),
     );
   }
@@ -382,15 +496,15 @@ class _BookingsScreenState extends State<BookingsScreen> {
         if (!selected) {
           switch (label) {
             case "Dashboard":
-              Navigator.pushNamed(context, '/dashboard');
+              Navigator.pushReplacementNamed(context, '/dashboard');
               break;
             case "Products":
-              Navigator.pushNamed(context, '/products');
+              Navigator.pushReplacementNamed(context, '/products');
               break;
             case "Bookings":
               break;
             case "Profile":
-              Navigator.pushNamed(context, '/profile');
+              Navigator.pushReplacementNamed(context, '/profile');
               break;
           }
         }

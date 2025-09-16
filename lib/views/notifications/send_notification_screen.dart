@@ -1,9 +1,10 @@
+import 'package:business_partner_main/models/customer.dart';
 import 'package:flutter/material.dart';
 import '../../resources/styles/text_styles.dart';
 import '../../models/notification_model.dart';
 
 class SendNotificationScreen extends StatefulWidget {
-  const SendNotificationScreen({Key? key}) : super(key: key);
+  const SendNotificationScreen({Key? key, required Customer customer}) : super(key: key);
 
   @override
   State<SendNotificationScreen> createState() => _SendNotificationScreenState();
