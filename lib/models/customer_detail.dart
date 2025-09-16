@@ -1,4 +1,6 @@
-// lib/models/customer_detail.dart - CREATE THIS FILE
+// lib/models/customer_detail.dart - ENHANCED FOR FALLBACK
+import 'package:business_partner_main/models/customer.dart';
+
 class CustomerDetail {
   final String id;
   final String name;
@@ -35,6 +37,28 @@ class CustomerDetail {
     this.tags = const [],
     this.bookingHistory = const [],
   });
+
+  // ✅ ENHANCED: Create from Customer (fallback constructor)
+  factory CustomerDetail.fromCustomer(Customer customer) {
+    return CustomerDetail(
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email,
+      avatar: customer.avatar,
+      roles: customer.roles,
+      isActive: customer.isActive,
+      designation: customer.designation,
+      bio: customer.bio,
+      city: customer.city,
+      address: customer.address,
+      totalBookings: customer.totalBookings,
+      totalSpend: 0.0,
+      lastSeen: null,
+      tags: customer.totalBookings > 5 ? ['Regular'] : ['New'],
+      bookingHistory: [],
+    );
+  }
 
   // Create from API response with bookings
   factory CustomerDetail.fromJson(Map<String, dynamic> json) {
@@ -113,6 +137,8 @@ class CustomerDetail {
       tags.add('Regular');
     } else if (bookingCount > 0) {
       tags.add('New');
+    } else {
+      tags.add('Potential');
     }
     
     if (totalSpend >= 5000) {
@@ -153,7 +179,7 @@ class CustomerDetail {
   }
 }
 
-// Booking History Model
+// Booking History Model (unchanged)
 class BookingHistory {
   final String id;
   final String title;
