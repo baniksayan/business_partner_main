@@ -197,4 +197,35 @@ class ProductProvider with ChangeNotifier {
   Future<void> refreshProducts(BuildContext context) async {
     await getAllProducts(context);
   }
+
+
+
+
+
+// ✅ NEW: Update local product in cache
+  void updateLocalProduct(Product updatedProduct) {
+    print('🔄 [ProductProvider] Updating local product cache: ${updatedProduct.id}');
+    
+    final index = _products.indexWhere((p) => p.id == updatedProduct.id);
+    if (index != -1) {
+      _products[index] = updatedProduct;
+      notifyListeners();
+      print('✅ [ProductProvider] Local product cache updated');
+    }
+  }
+
+  // ✅ NEW: Remove product from local cache
+  void removeLocalProduct(String productId) {
+    print('🗑️ [ProductProvider] Removing product from local cache: $productId');
+    
+    _products.removeWhere((p) => p.id == productId);
+    notifyListeners();
+    print('✅ [ProductProvider] Product removed from local cache');
+  }
+
+  // ✅ ENHANCED: Update existing updateProduct method to use ProductApiService
+ 
+  // ✅ ENHANCED: Update existing deleteProduct method to use ProductApiService
+  
 }
+

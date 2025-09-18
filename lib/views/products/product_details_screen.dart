@@ -10,6 +10,7 @@ import '../../widgets/products/product_inventory_tab.dart';
 import '../../widgets/products/product_analytics_tab.dart';
 import '../../widgets/products/product_action_bar.dart';
 import '../../widgets/products/product_options_bottom_sheet.dart';
+import '../../widgets/products/full_screen_image_gallery.dart';
 import '../../widgets/dialogs/reply_dialog_widget.dart';
 import '../../widgets/dialogs/stock_dialog_widget.dart';
 import '../../widgets/dialogs/price_dialog_widget.dart';

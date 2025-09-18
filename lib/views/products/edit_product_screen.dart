@@ -1,13 +1,19 @@
-// lib/views/products/edit_product_screen.dart
+// lib/views/products/edit_product_screen.dart - FIXED IMAGE PICKER METHODS
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart'; // ✅ ADD THIS for kIsWeb
+import 'dart:io';
+import 'dart:typed_data';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
+import '../../services/file_upload_service.dart';
+import '../../services/product_api_service.dart';
 
 class EditProductScreen extends StatefulWidget {
   final Product product;
-
   const EditProductScreen({Key? key, required this.product}) : super(key: key);
 
   @override
@@ -27,8 +33,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
   String? _selectedCategoryId;
   String? _selectedSubCategoryId;
   List<String> _imageUrls = [];
+  List<File> _selectedFiles = [];
+  List<Uint8List> _webImages = [];
+  List<String> _webImageNames = [];
   bool _isActive = true;
   bool _showImageUrlInput = false;
+  bool _isUploading = false;
+  bool _isSaving = false;
+  final ImagePicker _imagePicker = ImagePicker();
 
   // Categories with IDs that match your database
   final List<Map<String, dynamic>> categories = [
@@ -82,27 +94,20 @@ class _EditProductScreenState extends State<EditProductScreen> {
     // Set category - try to find matching category ID
     _initializeCategory();
     
-    print('📦 [EditProduct] Initialized with:');
-    print('   - Name: ${widget.product.name}');
-    print('   - Category: ${widget.product.category}');
-    print('   - Category ID: ${widget.product.categoryId}');
-    print('   - Sub-category ID: ${widget.product.subCategoryId}');
+    print('📦 [EditProduct] Initialized with existing images: ${_imageUrls.length}');
   }
 
   void _initializeCategory() {
-    // Try to match existing category
     if (widget.product.categoryId != null) {
       _selectedCategoryId = widget.product.categoryId;
     } else {
-      // Try to find category by name
       final matchingCategory = categories.firstWhere(
         (cat) => cat['name'].toString().toLowerCase() == widget.product.category.toLowerCase(),
-        orElse: () => categories.first, // Default to first category
+        orElse: () => categories.first,
       );
       _selectedCategoryId = matchingCategory['id'];
     }
     
-    // Set sub-category if available
     if (widget.product.subCategoryId != null) {
       _selectedSubCategoryId = widget.product.subCategoryId;
     }
@@ -149,253 +154,261 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ),
         ],
       ),
-      body: Consumer<ProductProvider>(
-        builder: (context, productProvider, child) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Info Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Info Card (unchanged)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      child: const Icon(Icons.edit, color: Colors.white, size: 24),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Edit Product',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          child: const Icon(Icons.edit, color: Colors.white, size: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Edit Product',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Product ID: ${widget.product.id}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Image Section
-                  _buildImageSection(),
-                  const SizedBox(height: 24),
-
-                  // Basic Information
-                  _buildTextField(
-                    controller: _nameController,
-                    label: 'Product Name *',
-                    icon: Icons.shopping_bag,
-                    validator: (value) => value?.isEmpty ?? true ? 'Please enter product name' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  _buildTextField(
-                    controller: _productCodeController,
-                    label: 'Product Code (SKU)',
-                    icon: Icons.qr_code,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  _buildTextField(
-                    controller: _descriptionController,
-                    label: 'Description *',
-                    icon: Icons.description,
-                    maxLines: 3,
-                    validator: (value) => value?.isEmpty ?? true ? 'Please enter description' : null,
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Pricing Section
-                  const Text(
-                    'Pricing',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _buildTextField(
-                          controller: _priceController,
-                          label: 'Price *',
-                          icon: Icons.currency_rupee,
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) return 'Please enter price';
-                            if (double.tryParse(value!) == null) return 'Invalid price';
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _discountController,
-                          label: 'Discount %',
-                          icon: Icons.percent,
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Category Section (REQUIRED)
-                  const Text(
-                    'Category (Required)',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCategoryDropdown(),
-                  const SizedBox(height: 16),
-                  _buildSubCategoryDropdown(),
-                  const SizedBox(height: 24),
-                  
-                  // Inventory Section
-                  const Text(
-                    'Inventory',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _quantityController,
-                    label: 'Quantity *',
-                    icon: Icons.inventory,
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) return 'Please enter quantity';
-                      if (int.tryParse(value!) == null) return 'Invalid quantity';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Status Toggle
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _isActive ? Icons.check_circle : Icons.cancel,
-                          color: _isActive ? Colors.green : Colors.red,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _isActive ? 'Product is active' : 'Product is inactive',
+                          Text(
+                            'Product ID: ${widget.product.id}',
                             style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontSize: 14,
                             ),
                           ),
-                        ),
-                        Switch(
-                          value: _isActive,
-                          onChanged: (value) => setState(() => _isActive = value),
-                          activeColor: const Color(0xFF4FC3F7),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              
+              // Enhanced Image Section with File Upload
+              _buildEnhancedImageSection(),
+              const SizedBox(height: 24),
+              
+              // Basic Information (unchanged)
+              _buildTextField(
+                controller: _nameController,
+                label: 'Product Name *',
+                icon: Icons.shopping_bag,
+                validator: (value) => value?.isEmpty ?? true ? 'Please enter product name' : null,
+              ),
+              const SizedBox(height: 16),
+              
+              _buildTextField(
+                controller: _productCodeController,
+                label: 'Product Code (SKU)',
+                icon: Icons.qr_code,
+              ),
+              const SizedBox(height: 16),
+              
+              _buildTextField(
+                controller: _descriptionController,
+                label: 'Description *',
+                icon: Icons.description,
+                maxLines: 3,
+                validator: (value) => value?.isEmpty ?? true ? 'Please enter description' : null,
+              ),
+              const SizedBox(height: 24),
+              
+              // Pricing Section (unchanged)
+              const Text(
+                'Pricing',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _buildTextField(
+                      controller: _priceController,
+                      label: 'Price *',
+                      icon: Icons.currency_rupee,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) return 'Please enter price';
+                        if (double.tryParse(value!) == null) return 'Invalid price';
+                        return null;
+                      },
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: const BorderSide(color: Colors.grey),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text('Cancel'),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          onPressed: productProvider.isLoading ? null : _updateProduct,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4FC3F7),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: productProvider.isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text('Update Product', style: TextStyle(fontSize: 16)),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _discountController,
+                      label: 'Discount %',
+                      icon: Icons.percent,
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
                 ],
               ),
-            ),
-          );
-        },
+              const SizedBox(height: 24),
+              
+              // Category Section (unchanged)
+              const Text(
+                'Category (Required)',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildCategoryDropdown(),
+              const SizedBox(height: 16),
+              _buildSubCategoryDropdown(),
+              const SizedBox(height: 24),
+              
+              // Inventory Section (unchanged)
+              const Text(
+                'Inventory',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildTextField(
+                controller: _quantityController,
+                label: 'Quantity *',
+                icon: Icons.inventory,
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value?.isEmpty ?? true) return 'Please enter quantity';
+                  if (int.tryParse(value!) == null) return 'Invalid quantity';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              // Status Toggle (unchanged)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isActive ? Icons.check_circle : Icons.cancel,
+                      color: _isActive ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _isActive ? 'Product is active' : 'Product is inactive',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Switch(
+                      value: _isActive,
+                      onChanged: (value) => setState(() => _isActive = value),
+                      activeColor: const Color(0xFF4FC3F7),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: const BorderSide(color: Colors.grey),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: (_isSaving || _isUploading) ? null : _updateProduct,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4FC3F7),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: (_isSaving || _isUploading)
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(_isUploading ? 'Uploading...' : 'Updating...'),
+                              ],
+                            )
+                          : const Text('Update Product', style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildImageSection() {
+  // Enhanced Image Section with File Upload
+  Widget _buildEnhancedImageSection() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -425,19 +438,53 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 ),
               ),
               const Spacer(),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _showImageUrlInput = !_showImageUrlInput;
-                  });
-                },
-                child: Text(_showImageUrlInput ? 'Hide' : 'Add URL'),
+              ElevatedButton.icon(
+                onPressed: _isUploading ? null : _showImagePickerOptions,
+                icon: _isUploading 
+                    ? SizedBox(
+                        width: 16, 
+                        height: 16, 
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : Icon(Icons.add_photo_alternate),
+                label: Text(_isUploading ? 'Uploading...' : 'Add Images'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF4FC3F7),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           
+          // Show selected files preview
+          if (_selectedFiles.isNotEmpty || _webImages.isNotEmpty) ...[
+            const Text('New Images to Upload:', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange)),
+            const SizedBox(height: 8),
+            _buildNewImagesGrid(),
+            const SizedBox(height: 16),
+          ],
+          
+          // URL Input Section
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _showImageUrlInput = !_showImageUrlInput;
+                    });
+                  },
+                  icon: Icon(_showImageUrlInput ? Icons.keyboard_arrow_up : Icons.link),
+                  label: Text(_showImageUrlInput ? 'Hide URL Input' : 'Or Add by URL'),
+                ),
+              ),
+            ],
+          ),
+          
           if (_showImageUrlInput) ...[
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -460,13 +507,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
             const SizedBox(height: 16),
           ],
           
+          // Existing Images
           if (_imageUrls.isNotEmpty) ...[
-            const Text('Current Images:', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('Current Images:', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green)),
             const SizedBox(height: 8),
-            ...(_imageUrls.map((url) => _buildImageUrlItem(url)).toList()),
-          ] else ...[
+            _buildExistingImagesGrid(),
+          ] else if (_selectedFiles.isEmpty && _webImages.isEmpty) ...[
             Container(
-              height: 80,
+              height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.grey[100],
@@ -476,8 +524,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add_photo_alternate, color: Colors.grey[400]),
-                  const Text('No images added', style: TextStyle(color: Colors.grey)),
+                  Icon(Icons.add_photo_alternate, color: Colors.grey[400], size: 40),
+                  const SizedBox(height: 8),
+                  Text('No images added', style: TextStyle(color: Colors.grey[600])),
+                  const SizedBox(height: 4),
+                  Text('Tap "Add Images" to upload files', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                 ],
               ),
             ),
@@ -487,31 +538,394 @@ class _EditProductScreenState extends State<EditProductScreen> {
     );
   }
 
-  Widget _buildImageUrlItem(String url) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green[200]!),
+  // Show Image Picker Options
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.image, color: Colors.green),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(url, style: const TextStyle(fontSize: 12)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-            onPressed: () => _removeImageUrl(url),
-          ),
-        ],
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Add Product Images',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildPickerOption(
+                    icon: Icons.camera_alt,
+                    label: 'Camera',
+                    onTap: () => _pickImagesFromCamera(),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildPickerOption(
+                    icon: Icons.photo_library,
+                    label: 'Gallery',
+                    onTap: () => _pickImagesFromGallery(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildPickerOption(
+              icon: Icons.file_upload,
+              label: 'Browse Files (Multiple)',
+              onTap: () => _pickMultipleImages(),
+              fullWidth: true,
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }
 
+  Widget _buildPickerOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool fullWidth = false,
+  }) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: EdgeInsets.all(fullWidth ? 16 : 20),
+        decoration: BoxDecoration(
+          color: Color(0xFF4FC3F7).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Color(0xFF4FC3F7).withOpacity(0.3)),
+        ),
+        child: fullWidth
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: Color(0xFF4FC3F7)),
+                  const SizedBox(width: 8),
+                  Text(label, style: TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              )
+            : Column(
+                children: [
+                  Icon(icon, color: Color(0xFF4FC3F7), size: 30),
+                  const SizedBox(height: 8),
+                  Text(label, style: TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              ),
+      ),
+    );
+  }
+
+// ✅ QUICK FIX: Pick Images from Gallery (Web & Mobile Compatible)
+Future<void> _pickImagesFromGallery() async {
+  try {
+    print('🖼️ [EditProduct] Opening gallery for multiple images...');
+    
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+      withData: true, // ✅ CRITICAL: Always loads bytes for web
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      print('🖼️ [EditProduct] Selected ${result.files.length} images from gallery');
+      
+      int addedCount = 0;
+      
+      setState(() {
+        for (var file in result.files) {
+          if (!_isValidImageFile(file.name)) {
+            print('⚠️ [EditProduct] Skipping non-image file: ${file.name}');
+            continue;
+          }
+          
+          // ✅ FIXED: Always use bytes, never check path on web
+          if (file.bytes != null && file.bytes!.isNotEmpty) {
+            _webImages.add(file.bytes!);
+            _webImageNames.add(file.name);
+            addedCount++;
+            print('✅ [EditProduct] Added file: ${file.name} (${file.bytes!.length} bytes)');
+          } else {
+            print('⚠️ [EditProduct] File has no bytes data: ${file.name}');
+          }
+        }
+      });
+      
+      if (addedCount > 0) {
+        _showSuccess('Selected $addedCount images successfully!');
+      } else {
+        _showError('No valid images were selected. Please try again.');
+      }
+    } else {
+      print('📱 [EditProduct] No images selected from gallery');
+    }
+  } catch (e) {
+    print('❌ [EditProduct] Error picking from gallery: $e');
+    _showError('Error accessing gallery. Please try again.');
+  }
+}
+
+// ✅ QUICK FIX: Pick Multiple Images (Web & Mobile Compatible)
+Future<void> _pickMultipleImages() async {
+  try {
+    print('📁 [EditProduct] Opening file picker for multiple images...');
+    
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+      withData: true, // ✅ CRITICAL: Always loads bytes
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      print('📁 [EditProduct] Selected ${result.files.length} images via file picker');
+      
+      int addedCount = 0;
+      
+      setState(() {
+        for (var file in result.files) {
+          if (!_isValidImageFile(file.name)) {
+            print('⚠️ [EditProduct] Skipping non-image file: ${file.name}');
+            continue;
+          }
+          
+          // ✅ FIXED: Only use bytes (works on both web and mobile)
+          if (file.bytes != null && file.bytes!.isNotEmpty) {
+            _webImages.add(file.bytes!);
+            _webImageNames.add(file.name);
+            addedCount++;
+            print('✅ [EditProduct] Added file: ${file.name} (${file.bytes!.length} bytes)');
+          } else {
+            print('⚠️ [EditProduct] File has no bytes data: ${file.name}');
+          }
+        }
+      });
+      
+      if (addedCount > 0) {
+        _showSuccess('Selected $addedCount images successfully!');
+      } else {
+        _showError('No valid image files were selected.');
+      }
+    } else {
+      print('📁 [EditProduct] No files selected via file picker');
+    }
+  } catch (e) {
+    print('❌ [EditProduct] Error picking files: $e');
+    _showError('Error selecting files. Please try again.');
+  }
+}
+
+// ✅ UPDATED: Camera picker (mobile only)
+Future<void> _pickImagesFromCamera() async {
+  try {
+    print('📷 [EditProduct] Opening camera...');
+    
+    if (kIsWeb) {
+      _showError('Camera not available on web. Please use file upload instead.');
+      return;
+    }
+    
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1920,
+      maxHeight: 1080,
+      imageQuality: 85,
+    );
+    
+    if (image != null) {
+      // ✅ For camera, we convert to bytes for consistency
+      final bytes = await image.readAsBytes();
+      setState(() {
+        _webImages.add(bytes);
+        _webImageNames.add('camera_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      });
+      print('📷 [EditProduct] Image captured from camera');
+      _showSuccess('Image captured successfully!');
+    } else {
+      print('📷 [EditProduct] Camera capture cancelled');
+    }
+  } catch (e) {
+    print('❌ [EditProduct] Error picking from camera: $e');
+    _showError('Error accessing camera. Please check permissions.');
+  }
+}
+
+// ✅ UPDATED: Build Grid for New Images (Only bytes now)
+Widget _buildNewImagesGrid() {
+  return Container(
+    height: 100,
+    child: ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: _webImages.length, // ✅ Only web images now
+      itemBuilder: (context, index) {
+        return _buildNewImageItem(
+          webImageData: _webImages[index],
+          webImageName: _webImageNames[index],
+          index: index,
+        );
+      },
+    ),
+  );
+}
+
+Widget _buildNewImageItem({
+  required Uint8List webImageData,
+  required String webImageName,
+  required int index,
+}) {
+  return Container(
+    width: 90,
+    margin: const EdgeInsets.only(right: 8),
+    decoration: BoxDecoration(
+      color: Colors.orange[50],
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.orange[300]!),
+    ),
+    child: Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.memory(
+            webImageData,
+            width: 90,
+            height: 90,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 90,
+              height: 90,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.image, color: Colors.orange),
+                  Text(
+                    webImageName,
+                    style: TextStyle(fontSize: 10),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () => _removeNewImage(index),
+            child: Container(
+              padding: EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close, color: Colors.white, size: 16),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 4,
+          left: 4,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'NEW',
+              style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ✅ SIMPLIFIED: Remove New Image
+void _removeNewImage(int index) {
+  setState(() {
+    if (index < _webImages.length) {
+      _webImages.removeAt(index);
+      _webImageNames.removeAt(index);
+    }
+  });
+  _showSuccess('Image removed');
+}
+
+  // Build Grid for Existing Images
+  Widget _buildExistingImagesGrid() {
+    return Container(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _imageUrls.length,
+        itemBuilder: (context, index) {
+          final url = _imageUrls[index];
+          return Container(
+            width: 90,
+            margin: const EdgeInsets.only(right: 8),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    url,
+                    width: 90,
+                    height: 90,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.broken_image, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: GestureDetector(
+                    onTap: () => _removeImageUrl(url),
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.close, color: Colors.white, size: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+
+  // All your existing methods remain unchanged...
   Widget _buildCategoryDropdown() {
     return Container(
       decoration: BoxDecoration(
@@ -553,7 +967,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         onChanged: (value) {
           setState(() {
             _selectedCategoryId = value;
-            _selectedSubCategoryId = null; // Reset subcategory
+            _selectedSubCategoryId = null;
           });
           print('📂 [EditProduct] Category ID selected: $value');
         },
@@ -644,12 +1058,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           _imageUrlController.clear();
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a valid URL'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showError('Please enter a valid URL');
       }
     }
   }
@@ -660,74 +1069,112 @@ class _EditProductScreenState extends State<EditProductScreen> {
     });
   }
 
+  // Update Product using ProductApiService
   void _updateProduct() async {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      _showError('Please fill in all required fields');
       return;
     }
-
+    
     if (_selectedCategoryId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a category'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      _showError('Please select a category');
       return;
     }
 
-    print('🔄 [EditProduct] Updating product with all required fields...');
-
-    // Prepare complete update data including CATEGORY
-    final updateData = <String, dynamic>{
-      'name': _nameController.text.trim(),
-      'description': _descriptionController.text.trim(),
-      'price': double.parse(_priceController.text.trim()),
-      'quantity': int.parse(_quantityController.text.trim()),
-      'category': int.parse(_selectedCategoryId!), // REQUIRED FIELD
-      'is_active': _isActive,
-    };
-
-    // Add optional fields only if they have values
-    if (_productCodeController.text.trim().isNotEmpty) {
-      updateData['product_code'] = _productCodeController.text.trim();
-    }
-
-    if (_discountController.text.trim().isNotEmpty) {
-      updateData['discount_per'] = double.parse(_discountController.text.trim());
-    }
-
-    if (_selectedSubCategoryId != null) {
-      updateData['sub_category'] = int.parse(_selectedSubCategoryId!);
-    }
-
-    if (_imageUrls.isNotEmpty) {
-      updateData['image_urls'] = _imageUrls;
-    }
-
-    print('📦 [EditProduct] Final update data with category:');
-    updateData.forEach((key, value) {
-      print('   $key: $value (${value.runtimeType})');
+    print('🔄 [EditProduct] Starting product update with ProductApiService...');
+    
+    setState(() {
+      _isUploading = true;
     });
 
-    final productProvider = Provider.of<ProductProvider>(context, listen: false);
-
     try {
-      final success = await productProvider.updateProduct(context, widget.product.id, updateData);
+      // Upload new images first if any
+      List<String> newImageUrls = [];
+      
+      if (_selectedFiles.isNotEmpty || _webImages.isNotEmpty) {
+        print('📤 [EditProduct] Uploading ${_selectedFiles.length + _webImages.length} new images...');
+        
+        // Upload mobile files
+        for (File file in _selectedFiles) {
+          final uploadResult = await FileUploadService.uploadImage(file);
+          if (uploadResult.success && uploadResult.imageUrl != null) {
+            newImageUrls.add(uploadResult.imageUrl!);
+          } else {
+            print('⚠️ [EditProduct] Failed to upload image: ${uploadResult.error}');
+          }
+        }
+        
+        // Upload web files
+        for (int i = 0; i < _webImages.length; i++) {
+          final uploadResult = await FileUploadService.uploadWebImage(
+            _webImages[i], 
+            _webImageNames[i]
+          );
+          if (uploadResult.success && uploadResult.imageUrl != null) {
+            newImageUrls.add(uploadResult.imageUrl!);
+          } else {
+            print('⚠️ [EditProduct] Failed to upload web image: ${uploadResult.error}');
+          }
+        }
+        
+        print('✅ [EditProduct] Successfully uploaded ${newImageUrls.length} images');
+      }
 
-      if (success) {
+      setState(() {
+        _isUploading = false;
+        _isSaving = true;
+      });
+
+      // Combine existing URLs with new uploaded URLs
+      final allImageUrls = [..._imageUrls, ...newImageUrls];
+
+      // Prepare update data in format expected by your API
+      final updateData = <String, dynamic>{
+        'name': _nameController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'price': double.parse(_priceController.text.trim()),
+        'quantity': int.parse(_quantityController.text.trim()),
+        'category': int.parse(_selectedCategoryId!), // Your API expects integer
+        'is_active': _isActive,
+        'image_urls': allImageUrls, // Include all image URLs
+      };
+
+      // Add optional fields only if they have values
+      if (_productCodeController.text.trim().isNotEmpty) {
+        updateData['product_code'] = _productCodeController.text.trim();
+      }
+      if (_discountController.text.trim().isNotEmpty) {
+        updateData['discount_per'] = double.parse(_discountController.text.trim());
+      }
+      if (_selectedSubCategoryId != null) {
+        updateData['sub_category'] = int.parse(_selectedSubCategoryId!);
+      }
+
+      print('📦 [EditProduct] Final update data for ProductApiService:');
+      updateData.forEach((key, value) {
+        print('   $key: $value (${value.runtimeType})');
+      });
+
+      // Use your ProductApiService for update
+      try {
+        final updatedProduct = await ProductApiService.updateProduct(
+          widget.product.id, 
+          updateData
+        );
+        
+        print('✅ [EditProduct] Product updated successfully via ProductApiService');
+        
+        // Update the provider's cache with the updated product
+        final productProvider = Provider.of<ProductProvider>(context, listen: false);
+        productProvider.updateLocalProduct(updatedProduct);
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 8),
-                Text('${updateData['name']} updated successfully!'),
+                Expanded(child: Text('${updatedProduct.name} updated successfully!')),
               ],
             ),
             backgroundColor: Colors.green,
@@ -735,42 +1182,55 @@ class _EditProductScreenState extends State<EditProductScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
-        Navigator.pop(context, true); // Return true to indicate success
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Failed to update product: ${productProvider.errorMessage ?? "Unknown error"}'),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        Navigator.pop(context, true);
+        
+      } catch (apiError) {
+        print('❌ [EditProduct] ProductApiService error: $apiError');
+        
+        // Handle specific API errors from your service
+        String errorMessage = 'Failed to update product';
+        
+        if (apiError.toString().contains('AUTHENTICATION')) {
+          errorMessage = 'Please login again to continue';
+        } else if (apiError.toString().contains('VALIDATION')) {
+          errorMessage = 'Please check your product data';
+        } else if (apiError.toString().contains('NETWORK')) {
+          errorMessage = 'Network error. Please check your connection';
+        } else if (apiError.toString().contains('TIMEOUT')) {
+          errorMessage = 'Request timed out. Please try again';
+        } else if (apiError.toString().contains('PRODUCT_NOT_FOUND')) {
+          errorMessage = 'Product not found. It may have been deleted';
+        } else {
+          // Extract specific error message from your API service
+          final errorString = apiError.toString();
+          if (errorString.contains(': ')) {
+            errorMessage = errorString.split(': ').last;
+          }
+        }
+        
+        _showError(errorMessage);
       }
+      
     } catch (e) {
-      print('💥 [EditProduct] Exception: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.warning, color: Colors.white),
-              const SizedBox(width: 8),
-              Expanded(child: Text('Error: $e')),
-            ],
-          ),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      print('💥 [EditProduct] Unexpected exception: $e');
+      _showError('Unexpected error: $e');
+    } finally {
+      setState(() {
+        _isUploading = false;
+        _isSaving = false;
+      });
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   void _deleteProduct() {
@@ -797,35 +1257,102 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   void _confirmDelete() async {
     Navigator.pop(context); // Close dialog
-    Navigator.pop(context, true); // Go back to products list with success flag
-    
-    final productProvider = Provider.of<ProductProvider>(context, listen: false);
     
     try {
-      final success = await productProvider.deleteProduct(context, widget.product.id);
+      print('🗑️ [EditProduct] Deleting product via ProductApiService...');
+      
+      // Use your ProductApiService for deletion
+      final success = await ProductApiService.deleteProduct(widget.product.id);
       
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Product deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
+        print('✅ [EditProduct] Product deleted successfully via ProductApiService');
+        
+        // Update the provider to remove from cache
+        final productProvider = Provider.of<ProductProvider>(context, listen: false);
+        productProvider.removeLocalProduct(widget.product.id);
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete product: ${productProvider.errorMessage}'),
-            backgroundColor: Colors.red,
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                Text('${widget.product.name} deleted successfully'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
+        
+        Navigator.pop(context, true); // Go back with success
       }
+      
     } catch (e) {
+      print('❌ [EditProduct] Delete error: $e');
+      
+      String errorMessage = 'Failed to delete product';
+      
+      if (e.toString().contains('AUTHENTICATION')) {
+        errorMessage = 'Please login again to continue';
+      } else if (e.toString().contains('PRODUCT_NOT_FOUND')) {
+        errorMessage = 'Product not found. It may have been already deleted';
+      } else if (e.toString().contains('NETWORK')) {
+        errorMessage = 'Network error. Please check your connection';
+      } else {
+        final errorString = e.toString();
+        if (errorString.contains(': ')) {
+          errorMessage = errorString.split(': ').last;
+        }
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error deleting product: $e'),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text(errorMessage)),
+            ],
+          ),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
     }
   }
+  
+// ✅ ADD THIS: Show success messages helper method
+void _showSuccess(String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(Icons.check_circle, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          Expanded(child: Text(message)),
+        ],
+      ),
+      backgroundColor: Colors.green,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      duration: Duration(seconds: 3),
+    ),
+  );
+}
+
+// ✅ ADD THIS: Validate image file extensions helper method
+bool _isValidImageFile(String fileName) {
+  if (fileName.isEmpty) return false;
+  
+  final validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+  final extension = fileName.toLowerCase().split('.').last;
+  
+  return validExtensions.contains(extension);
+}
+
+// ✅ ADD THIS: Enhanced error messages helper method (if not already present)
+
 }

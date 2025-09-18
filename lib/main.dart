@@ -1,4 +1,5 @@
 // lib/main.dart - FIXED VERSION WITH CUSTOMER SCREEN METHODS
+import 'package:business_partner_main/providers/business_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
@@ -25,6 +26,16 @@ import 'views/bookings/reschedule_booking_screen.dart';
 import 'views/products/products_screen.dart';
 import 'views/products/search_suggestion_screen.dart';
 import 'views/notifications/notifications_screen.dart';
+
+//business screens
+import 'views/business/business_dashboard_screen.dart';
+import 'views/business/business_info_screen.dart';
+import 'views/business/business_analytics_screen.dart';
+import 'views/business/business_settings_screen.dart';
+import 'views/business/business_performance_screen.dart';
+import 'views/business/business_reports_screen.dart';
+
+
 
 // Settings screens
 import 'views/settings/settings_screen.dart'; 
@@ -107,6 +118,12 @@ class MyApp extends StatelessWidget {
             return BookingProvider();
           },
         ),
+        ChangeNotifierProvider(
+        create: (context) {
+          print('🏢 [Main] Creating BusinessProvider...');
+          return BusinessProvider();
+        },
+      ),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -211,6 +228,30 @@ class MyApp extends StatelessWidget {
       '/customer-wishlist': (context) => AuthenticatedRoute(
         child: _buildCustomerWishlistScreen(context),
       ),
+
+      '/business-dashboard': (context) => const AuthenticatedRoute(  // ✅ ADD THIS ROUTE
+          child: BusinessDashboardScreen(),
+        ),
+      '/business-info': (context) => const AuthenticatedRoute(
+        child: BusinessInfoScreen(),
+      ),
+      // Add these to your routes in main.dart
+      '/business-analytics': (context) => const AuthenticatedRoute(
+        child: BusinessAnalyticsScreen(),
+      ),
+      '/business-settings': (context) => const AuthenticatedRoute(
+        child: BusinessSettingsScreen(),
+      ),
+      // Add this to your routes in _buildAllRoutes()
+    '/business-performance': (context) => const AuthenticatedRoute(
+      child: BusinessPerformanceScreen(),
+    ),
+
+    '/business-reports': (context) => const AuthenticatedRoute(
+        child: BusinessReportsScreen(),
+      ),
+
+
     };
   }
 
@@ -478,7 +519,36 @@ class AppNavigator {
     print('🏠 [AppNavigator] Navigating to dashboard');
     _safeReplace('/dashboard');
   }
+
+  static void toBusinessInfo() {
+  print('🏢 [AppNavigator] Navigating to business info');
+  _safeNavigate('/business-info');
+}
   
+// Add these to your AppNavigator class
+static void toBusinessAnalytics() {
+  print('📊 [AppNavigator] Navigating to business analytics');
+  _safeNavigate('/business-analytics');
+}
+
+static void toBusinessDashboard() {
+  print('📊 [AppNavigator] Navigating to business dashboard');
+  _safeNavigate('/business-dashboard');
+}
+  static void toBusinessReports() {
+    print('📋 [AppNavigator] Navigating to business reports');
+    _safeNavigate('/business-reports');
+  }
+static void toBusinessSettings() {
+  print('⚙️ [AppNavigator] Navigating to business settings');
+  _safeNavigate('/business-settings');
+}
+// Add this to your AppNavigator class
+static void toBusinessPerformance() {
+  print('📊 [AppNavigator] Navigating to business performance');
+  _safeNavigate('/business-performance');
+}
+
   /// Navigate to products
   static void toProducts() {
     print('📦 [AppNavigator] Navigating to products');
